@@ -27,9 +27,9 @@ public class CommandListener extends ListenerAdapter {
 	
 	static {
 		commands.add(new CommandBin());
-		commands.add(new CommandPrune());
-		commands.add(new CommandHelp());
 		commands.add(new CommandEval());
+		commands.add(new CommandHelp());
+		commands.add(new CommandPrune());
 	}
 	
 	private void handleCommand(Guild guild, Message message, FailedCommand failedCommand) {
@@ -74,7 +74,7 @@ public class CommandListener extends ListenerAdapter {
 	}
 
 	@Override
-    public void onMessageReceived(MessageReceivedEvent event) {
+	public void onMessageReceived(MessageReceivedEvent event) {
 		if (event.getMessage().getContent().trim().startsWith(prefix)) {
 			handleCommand(event.getGuild(), event.getMessage(), null);
 		}
