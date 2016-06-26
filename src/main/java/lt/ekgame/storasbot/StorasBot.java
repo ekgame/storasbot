@@ -32,7 +32,6 @@ public class StorasBot {
 		String token = config.getString("api.discord");
 		String osuKey = config.getString("api.osu");
 		client = new JDABuilder().setBotToken(token).buildAsync();
-		client.getAccountManager().setGame("$help");
 		
 		osuApi = new Downloader(osuKey);
 		
