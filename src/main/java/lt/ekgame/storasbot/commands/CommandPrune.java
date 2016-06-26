@@ -1,7 +1,6 @@
 package lt.ekgame.storasbot.commands;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +8,7 @@ import lt.ekgame.storasbot.Utils;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
+import lt.ekgame.storasbot.commands.engine.CommandReference;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
 import net.dv8tion.jda.Permission;
 import net.dv8tion.jda.entities.Guild;
@@ -16,12 +16,8 @@ import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.entities.User;
 
+@CommandReference(isGuild=true, labels = {"prune", "clear"})
 public class CommandPrune implements Command<BotCommandContext> {
-	
-	@Override
-	public List<String> getLabels() {
-		return Arrays.asList("prune", "clear");
-	}
 
 	@Override
 	public String getHelp() {
@@ -32,15 +28,6 @@ public class CommandPrune implements Command<BotCommandContext> {
 			 + " You can optionally provide a user who's messages should be deleted.";
 	}
 
-	@Override
-	public boolean isGuildCommand() {
-		return true;
-	}
-
-	@Override
-	public boolean isPrivateCommand() {
-		return false;
-	}
 	@Override
 	public CommandResult execute(CommandIterator command, BotCommandContext context) {
 		// TODO: refactor to check if enough messages will be deleted before performing the action.

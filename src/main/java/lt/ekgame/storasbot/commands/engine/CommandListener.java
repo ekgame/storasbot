@@ -1,15 +1,17 @@
 package lt.ekgame.storasbot.commands.engine;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-import lt.ekgame.storasbot.commands.CommandBin;
-import lt.ekgame.storasbot.commands.CommandHelp;
-import lt.ekgame.storasbot.commands.CommandPrune;
-import lt.ekgame.storasbot.commands.eval.CommandEval;
+import com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath.ClassInfo;
+
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.PrivateChannel;
@@ -17,19 +19,43 @@ import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.events.message.guild.GuildMessageUpdateEvent;
 import net.dv8tion.jda.hooks.ListenerAdapter;
+import net.dv8tion.jda.utils.SimpleLog;
 
+@SuppressWarnings("unchecked")
 public class CommandListener extends ListenerAdapter {
 	
+	public static final SimpleLog LOG = SimpleLog.getLog("Command Listener");
+	
 	private static String prefix = "$";
-	private static List<Command<BotCommandContext>> commands = new ArrayList<>();
+	private List<CommandDefinition> commands = new ArrayList<>();
+	private List<FailedCommand> failedCommands = new LinkedList<>();
 	
-	private static List<FailedCommand> failedCommands = new LinkedList<>();
-	
-	static {
-		commands.add(new CommandBin());
-		commands.add(new CommandEval());
-		commands.add(new CommandHelp());
-		commands.add(new CommandPrune());
+	public CommandListener() {
+		try {
+			ClassPath classPath = ClassPath.from(CommandListener.class.getClassLoader());
+			Set<ClassInfo> classes = classPath.getTopLevelClassesRecursive("lt.ekgame.storasbot.commands");
+			for (ClassInfo info : classes) {
+				try {
+					CommandReference reference = info.load().getAnnotation(CommandReference.class);
+					if (reference != null) {
+						Object rawCommand = info.load().newInstance();
+						if (rawCommand instanceof Command) {
+							commands.add(new CommandDefinition((Command<BotCommandContext>) rawCommand, reference));
+							LOG.info("Loaded " + info.getSimpleName() + ".");
+						}
+						else {
+							LOG.warn("Failed to load class \"" + info.getResourceName() + "\" - doesn't extend Command.");
+						}
+					}
+				} catch (InstantiationException | IllegalAccessException e) {
+					LOG.fatal("Failed to load class \"" + info.getResourceName() + "\" - " + e.getMessage());
+					e.printStackTrace();
+				}
+				//System.out.println(info.load().getName() + " " + info.getClass().isAnnotationPresent(CommandReference.class));
+			}
+		} catch (IOException e) {
+			LOG.fatal("Failed to get classpath from \"lt.ekgame.storasbot.commands\" - " + e.getMessage());
+		}
 	}
 	
 	private void handleCommand(Guild guild, Message message, FailedCommand failedCommand) {
@@ -40,22 +66,23 @@ public class CommandListener extends ListenerAdapter {
 		if (!oLabel.isPresent()) return;
 		String label = oLabel.get().toLowerCase();
 		
-		Optional<Command<BotCommandContext>> oCommand = getCommandByName(label);
+		Optional<CommandDefinition> oCommand = getCommandByName(label);
 		BotCommandContext theContext = failedCommand == null ? new BotCommandContext(message, guild) : failedCommand.context;
 		
 		if (oCommand.isPresent()) {
-			Command<BotCommandContext> command = oCommand.get();
+			CommandDefinition definition = oCommand.get();
 			
-			if (message.getChannel() instanceof PrivateChannel && !command.isPrivateCommand()) {
+			if (message.getChannel() instanceof PrivateChannel && !definition.isPrivateCommand()) {
 				theContext.reply("_This command can not be used in private chat._");
 				return;
 			}
 			
-			if (message.getChannel() instanceof TextChannel && !command.isGuildCommand()) {
+			if (message.getChannel() instanceof TextChannel && !definition.isGuildCommand()) {
 				theContext.reply("_This command can only be used in private chat._");
 				return;
 			}
 			
+			Command<BotCommandContext> command = definition.getInstance();
 			CommandResult result = command.execute(iterator, theContext);
 			if (result == CommandResult.FAIL && failedCommand == null)
 				addFailedCommand(message, theContext);
@@ -104,9 +131,9 @@ public class CommandListener extends ListenerAdapter {
 		return null;
 	}
 
-	public Optional<Command<BotCommandContext>> getCommandByName(String name) {
+	public Optional<CommandDefinition> getCommandByName(String name) {
 		name = name.toLowerCase().trim();
-		for (Command<BotCommandContext> command : commands) {
+		for (CommandDefinition command : commands) {
 			List<String> labels = command.getLabels();
 			for (String label : labels) 
 				if (label.toLowerCase().equals(name))
@@ -132,9 +159,37 @@ public class CommandListener extends ListenerAdapter {
 		protected BotCommandContext context;
 		protected long timestamp = System.currentTimeMillis();
 		
-		FailedCommand(Message original, BotCommandContext context) {
+		protected FailedCommand(Message original, BotCommandContext context) {
 			this.original = original;
 			this.context = context;
+		}
+	}
+	
+	public class CommandDefinition {
+		private Command<BotCommandContext> command;
+		private CommandReference reference;
+		private List<String> labels;
+		
+		private CommandDefinition(Command<BotCommandContext> command, CommandReference reference) {
+			this.command = command;
+			this.reference = reference;
+			this.labels = Arrays.asList(reference.labels());
+		}
+		
+		public Command<BotCommandContext> getInstance() {
+			return command;
+		}
+		
+		public boolean isGuildCommand() {
+			return reference.isGuild();
+		}
+		
+		public boolean isPrivateCommand() {
+			return reference.isPrivate();
+		}
+		
+		public List<String> getLabels() {
+			return labels;
 		}
 	}
 }

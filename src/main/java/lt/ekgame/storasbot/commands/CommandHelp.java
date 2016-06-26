@@ -1,7 +1,5 @@
 package lt.ekgame.storasbot.commands;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import lt.ekgame.storasbot.StorasBot;
@@ -9,14 +7,12 @@ import lt.ekgame.storasbot.Utils;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
+import lt.ekgame.storasbot.commands.engine.CommandListener.CommandDefinition;
+import lt.ekgame.storasbot.commands.engine.CommandReference;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
 
+@CommandReference(isPrivate=true, isGuild=true, labels = {"help", "?"})
 public class CommandHelp implements Command<BotCommandContext> {
-	
-	@Override
-	public List<String> getLabels() {
-		return Arrays.asList("help", "?");
-	}
 
 	@Override
 	public String getHelp() {
@@ -27,23 +23,13 @@ public class CommandHelp implements Command<BotCommandContext> {
 	}
 
 	@Override
-	public boolean isGuildCommand() {
-		return true;
-	}
-
-	@Override
-	public boolean isPrivateCommand() {
-		return true;
-	}
-
-	@Override
 	public CommandResult execute(CommandIterator command, BotCommandContext context) {
 		Optional<String> token = command.getToken();
 		if (token.isPresent()) {
 			String commandLabel = token.get();
-			Optional<Command<BotCommandContext>> oCommand = StorasBot.commandHandler.getCommandByName(commandLabel);
+			Optional<CommandDefinition> oCommand = StorasBot.commandHandler.getCommandByName(commandLabel);
 			if (oCommand.isPresent()) {
-				Command<BotCommandContext> theCommand = oCommand.get();
+				Command<BotCommandContext> theCommand = oCommand.get().getInstance();
 				String help = "```" + Utils.escapeMarkdownBlock(theCommand.getHelp()) + "```";
 				context.reply(help);
 				return CommandResult.OK;

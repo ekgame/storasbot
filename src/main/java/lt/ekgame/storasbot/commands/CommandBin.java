@@ -14,12 +14,14 @@ import lt.ekgame.storasbot.Utils;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
+import lt.ekgame.storasbot.commands.engine.CommandReference;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
 import net.dv8tion.jda.Permission;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.Role;
 import net.dv8tion.jda.entities.User;
 
+@CommandReference(isGuild=true, labels = {"bin"})
 public class CommandBin implements Command<BotCommandContext> {
 
 	private static List<String> subCommands = new ArrayList<>();
@@ -27,12 +29,6 @@ public class CommandBin implements Command<BotCommandContext> {
 	
 	static {
 		subCommands.addAll(Arrays.asList("list", "search", "add", "create", "edit", "change", "delete", "remove", "source", "raw", "random"));
-	}
-	
-
-	@Override
-	public List<String> getLabels() {
-		return Arrays.asList("bin");
 	}
 
 	@Override
@@ -49,17 +45,6 @@ public class CommandBin implements Command<BotCommandContext> {
 			 + "Bin is a feature to save snippets of text and/or links"
 			 + " to recall them later. Think of it as a time capsule or"
 			 + " a way to quickly answer frequently asked questions.";
-	}
-	
-
-	@Override
-	public boolean isGuildCommand() {
-		return true;
-	}
-
-	@Override
-	public boolean isPrivateCommand() {
-		return false;
 	}
 	
 	@Override
