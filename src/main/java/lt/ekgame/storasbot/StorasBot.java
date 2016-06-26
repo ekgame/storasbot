@@ -16,6 +16,8 @@ import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.JDABuilder;
 import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.MessageChannel;
+import net.dv8tion.jda.events.ReadyEvent;
+import net.dv8tion.jda.hooks.ListenerAdapter;
 
 public class StorasBot {
 	
@@ -39,6 +41,13 @@ public class StorasBot {
 		client.addEventListener(commandHandler = new CommandListener());
 		client.addEventListener(new BeatmapLinkExaminer());
 		client.addEventListener(new BanchoStatusChecker());
+		
+		client.addEventListener(new ListenerAdapter() {
+			@Override
+			public void onReady(ReadyEvent event) {
+				client.getAccountManager().setGame(config.getString("general.game"));
+			}
+		});
 	}
 	
 	public static void sendMessage(MessageChannel messageChannel, String message, Consumer<Message> consumer) {
