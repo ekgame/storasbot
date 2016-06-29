@@ -1,0 +1,21 @@
+package lt.ekgame.storasbot.utils;
+
+import org.tillerino.osuApiModel.OsuApiUser;
+
+import com.google.gson.annotations.SerializedName;
+
+public class OsuUser extends OsuApiUser {
+	
+	@SerializedName("pp_country_rank")
+	private int countryRank;
+
+	public int getCountryRank() {
+		return countryRank;
+	}
+	
+	public String formatLevel() {
+		int level = (int) getLevel();
+		double progress = (getLevel() - level)*100;
+		return level + String.format(" (%.0f%%)", progress);
+	}
+}

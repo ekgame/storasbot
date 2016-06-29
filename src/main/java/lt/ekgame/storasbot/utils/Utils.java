@@ -1,4 +1,4 @@
-package lt.ekgame.storasbot;
+package lt.ekgame.storasbot.utils;
 
 import java.util.ArrayList;
 import java.util.List;

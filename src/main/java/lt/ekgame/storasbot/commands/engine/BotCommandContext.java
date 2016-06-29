@@ -12,12 +12,18 @@ public class BotCommandContext {
 	
 	private Message message;
 	private Guild guild;
+	private String label;
 	
 	private Message reply;
 	
-	public BotCommandContext(Message message, Guild guild) {
+	public BotCommandContext(Message message, Guild guild, String label) {
 		this.message = message;
 		this.guild = guild;
+		this.label = label;
+	}
+	
+	public String getLabel() {
+		return label;
 	}
 	
 	public Message getMessage() {

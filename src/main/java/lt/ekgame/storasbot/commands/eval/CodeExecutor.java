@@ -18,7 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import lt.ekgame.storasbot.StorasBot;
-import lt.ekgame.storasbot.Utils;
+import lt.ekgame.storasbot.utils.Utils;
 import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.events.message.guild.GuildMessageUpdateEvent;

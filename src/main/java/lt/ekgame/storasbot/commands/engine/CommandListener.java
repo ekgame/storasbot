@@ -67,7 +67,8 @@ public class CommandListener extends ListenerAdapter {
 		String label = oLabel.get().toLowerCase();
 		
 		Optional<CommandDefinition> oCommand = getCommandByName(label);
-		BotCommandContext theContext = failedCommand == null ? new BotCommandContext(message, guild) : failedCommand.context;
+		BotCommandContext theContext = failedCommand == null 
+				? new BotCommandContext(message, guild, label) : failedCommand.context;
 		
 		if (oCommand.isPresent()) {
 			CommandDefinition definition = oCommand.get();

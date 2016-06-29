@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 
 import lt.ekgame.storasbot.BinTag;
 import lt.ekgame.storasbot.StorasBot;
-import lt.ekgame.storasbot.Utils;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
 import lt.ekgame.storasbot.commands.engine.CommandReference;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
+import lt.ekgame.storasbot.utils.Utils;
 import net.dv8tion.jda.Permission;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.Role;
