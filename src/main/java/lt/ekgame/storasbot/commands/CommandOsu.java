@@ -92,6 +92,8 @@ public class CommandOsu implements Command<BotCommandContext> {
 				}
 			}
 			
+			users = users.stream().distinct().collect(Collectors.toList());
+			
 			String message = "";
 			if (users.size() > 0) {
 				TableRenderer table = new TableRenderer();
