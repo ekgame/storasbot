@@ -18,4 +18,9 @@ public class OsuUser extends OsuApiUser {
 		double progress = (getLevel() - level)*100;
 		return level + String.format(" (%.0f%%)", progress);
 	}
+	
+	public int getPlayCount() {
+		// a cheat to avoid division by zero for osu! command.
+		return super.getPlayCount() <= 0 ? 1 : super.getPlayCount();
+	}
 }
