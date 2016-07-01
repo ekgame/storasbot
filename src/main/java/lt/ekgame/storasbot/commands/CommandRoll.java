@@ -72,7 +72,7 @@ public class CommandRoll implements Command<BotCommandContext>  {
 			
 			String addition = "**" + rolls.stream().map((num) -> num.toString()).collect(Collectors.joining("** + **")) + "**";
 			int sum = rolls.stream().mapToInt(Integer::intValue).sum();
-			context.reply(mention + " " + addition + " = **" + sum + "**" + failedString);
+			context.reply(mention + " " + addition + " = ***" + sum + "***" + failedString);
 		}
 		
 		return failed.size() > 0 ? CommandResult.FAIL : CommandResult.OK;
