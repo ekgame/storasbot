@@ -7,11 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.tillerino.osuApiModel.OsuApiUser;
 
 import lt.ekgame.storasbot.StorasBot;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
