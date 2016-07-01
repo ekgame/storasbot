@@ -12,6 +12,7 @@ import java.util.Set;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
+import lt.ekgame.storasbot.StorasBot;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.PrivateChannel;
@@ -51,15 +52,13 @@ public class CommandListener extends ListenerAdapter {
 					LOG.fatal("Failed to load class \"" + info.getResourceName() + "\" - " + e.getMessage());
 					e.printStackTrace();
 				}
-				//System.out.println(info.load().getName() + " " + info.getClass().isAnnotationPresent(CommandReference.class));
 			}
 		} catch (IOException e) {
 			LOG.fatal("Failed to get classpath from \"lt.ekgame.storasbot.commands\" - " + e.getMessage());
 		}
 	}
 	
-	private void handleCommand(Guild guild, Message message, FailedCommand failedCommand) {
-		String rawCommand = message.getContent().trim().substring(prefix.length());
+	private void handleCommand(String rawCommand, Guild guild, Message message, FailedCommand failedCommand) {
 		CommandIterator iterator = new CommandIterator(rawCommand);
 		
 		Optional<String> oLabel = iterator.getToken();
@@ -100,20 +99,34 @@ public class CommandListener extends ListenerAdapter {
 				failedCommand.timestamp = System.currentTimeMillis();
 		}
 	}
+	
+	public String getRawCommand(String command, Guild guild) {
+		command = command.trim();
+		if (command.startsWith(prefix)) 
+			return command.substring(prefix.length());
+		
+		if (command.startsWith(StorasBot.getPrefix(guild)))
+			return command.substring(StorasBot.getPrefix(guild).length() + 1);
+		
+		return null;
+	}
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
-		if (event.getMessage().getContent().trim().startsWith(prefix)) {
-			handleCommand(event.getGuild(), event.getMessage(), null);
-		}
+		if (event.getAuthor().equals(StorasBot.client.getSelfInfo()))
+			return; // no recursive commands
+		
+		String command = getRawCommand(event.getMessage().getContent(), event.getGuild());
+		if (command != null)
+			handleCommand(command, event.getGuild(), event.getMessage(), null);
 	}
 	
 	@Override
 	public void onGuildMessageUpdate(GuildMessageUpdateEvent event) {
-		FailedCommand command = getFailedCommand(event.getMessage());
-		if (command != null && event.getMessage().getContent().trim().startsWith(prefix)) {
-			handleCommand(event.getGuild(), event.getMessage(), command);
-		}
+		FailedCommand failedCommand = getFailedCommand(event.getMessage());
+		String command = getRawCommand(event.getMessage().getContent(), event.getGuild());
+		if (failedCommand != null && command != null) 
+			handleCommand(command, event.getGuild(), event.getMessage(), failedCommand);
 	}
 
 	private FailedCommand getFailedCommand(Message message) {

@@ -14,6 +14,7 @@ import com.typesafe.config.ConfigFactory;
 import lt.ekgame.storasbot.commands.engine.CommandListener;
 import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.JDABuilder;
+import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.MessageChannel;
 import net.dv8tion.jda.events.ReadyEvent;
@@ -48,6 +49,11 @@ public class StorasBot {
 				client.getAccountManager().setGame(config.getString("general.game"));
 			}
 		});
+	}
+	
+	public static String getPrefix(Guild guild) {
+		String nickname = guild.getNicknameForUser(client.getSelfInfo());
+		return "@" + (nickname != null ? nickname : client.getSelfInfo().getUsername());
 	}
 	
 	public static void sendMessage(MessageChannel messageChannel, String message, Consumer<Message> consumer) {
