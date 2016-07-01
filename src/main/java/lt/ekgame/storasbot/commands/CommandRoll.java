@@ -22,7 +22,7 @@ public class CommandRoll implements Command<BotCommandContext>  {
 	public String getHelp() {
 		return "Usage:\n"
 			 + "$roll                          \n"
-			 + "$roll <max>[ <max>, ...]       \n"
+			 + "$roll <max>[ <max> ...]       \n"
 			 + "$roll <n>d<max>[ <n>d<max> ...]\n"
 			 + "\n"
 			 + "Examples:     \n"

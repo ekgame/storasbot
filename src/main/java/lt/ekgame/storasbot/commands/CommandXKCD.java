@@ -47,7 +47,7 @@ public class CommandXKCD implements Command<BotCommandContext>  {
 			Element element = elements.get(0);
 			String image = element.attr("src");
 			if (image.isEmpty()) {
-				context.reply("_That commic can not be diplayed._");
+				context.reply("_That comic can not be diplayed._");
 				return CommandResult.FAIL;
 			}
 			
