@@ -41,9 +41,10 @@ public class TopWorker extends Thread implements EventListener {
 	private static String RANK_LISTING = "http://osu.ppy.sh/p/pp?c=%s&page=%d";
 	private static String MESSAGE_FORMAT = "New top play by **%s**!\n"
 			                            + "_%s - %s [%s]_\n"
-			                            + "(OD: **%s**, CS: **%s**, HP: **%s**, BPM: **%s**, AR: **%s**, SD: **%s**)\n"
+			                            + "(OD: **%s**, CS: **%s**, HP: **%s**, AR: **%s**)\n"
+			                            + "(Length: **%s** (%s), BPM: **%s**, SD: **%s**)\n"
 			                            + "<%s>\n" //link
-			                            + "%s • %s Rank%s • %s • %s%s • **%spp** • #%d personal best\n\n";
+			                            + "%s/%s • %s Rank%s • %s • %s%s • **%spp** • #%d personal best\n\n";
 	private boolean started = false;
 	
 	String formMessage(int scoreNum, RankedUser user, OsuApiScore score) {
@@ -68,10 +69,11 @@ public class TopWorker extends Thread implements EventListener {
 					Utils.escapeMarkdown(bm.getTitle()),
 					Utils.escapeMarkdown(bm.getVersion()),
 					diffFormat.format(bm.getOverallDifficulty()), diffFormat.format(bm.getCircleSize()),
-					diffFormat.format(bm.getHealthDrain()), diffFormat.format(bm.getBpm()),
-					diffFormat.format(bm.getApproachRate()), diffFormat.format(bm.getStarDifficulty()),
+					diffFormat.format(bm.getHealthDrain()), diffFormat.format(bm.getApproachRate()),
+					Utils.compactTimeString(bm.getTotalLength()), Utils.compactTimeString(bm.getHitLength()),
+					diffFormat.format(bm.getBpm()), diffFormat.format(bm.getStarDifficulty()),
 					String.format(BEATMAP_LINK, score.getBeatmapId()),
-					score.getPerfect() == 1 ? "FC" : ("x" + score.getMaxCombo()), 
+					"x" + score.getMaxCombo(), bm.getMaxCombo(),
 					score.getRank(), choke, diffFormat.format(score.getScore()), 
 					score.getPercentagePretty(), modsString, score.getPp(), scoreNum);
 		} catch (IOException e) {

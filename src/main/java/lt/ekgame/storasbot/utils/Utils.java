@@ -48,6 +48,17 @@ public class Utils {
 		return strings.stream().collect(Collectors.joining(" "));
 	}
 	
+	public static String numberToDual(int number) {
+		return (number > 9 ? "": "0") + number;
+	}
+	
+	public static String compactTimeString(int seconds) {
+		int mins = seconds / 60;
+		int secs = seconds % 60;
+		
+		return numberToDual(mins) + ":" + numberToDual(secs);
+	}
+	
 	public static Optional<User> getUser(Guild guild, String username) {
 		for (User user : guild.getUsers()) {
 			String nickname = guild.getNicknameForUser(user);
