@@ -1,4 +1,4 @@
-package lt.ekgame.storasbot;
+package lt.ekgame.storasbot.plugins;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -20,6 +20,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
+import lt.ekgame.storasbot.StorasBot;
 import lt.ekgame.storasbot.utils.Utils;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.TextChannel;

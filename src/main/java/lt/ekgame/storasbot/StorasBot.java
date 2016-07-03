@@ -12,6 +12,10 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import lt.ekgame.storasbot.commands.engine.CommandListener;
+import lt.ekgame.storasbot.plugins.AntiShitImageHosts;
+import lt.ekgame.storasbot.plugins.BanchoStatusChecker;
+import lt.ekgame.storasbot.plugins.BeatmapLinkExaminer;
+import lt.ekgame.storasbot.plugins.TopWorker;
 import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.JDABuilder;
 import net.dv8tion.jda.entities.Guild;
@@ -41,6 +45,7 @@ public class StorasBot {
 		client.addEventListener(new TopWorker());
 		client.addEventListener(commandHandler = new CommandListener());
 		client.addEventListener(new BeatmapLinkExaminer());
+		client.addEventListener(new AntiShitImageHosts());
 		client.addEventListener(new BanchoStatusChecker());
 		
 		client.addEventListener(new ListenerAdapter() {

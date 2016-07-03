@@ -1,4 +1,4 @@
-package lt.ekgame.storasbot;
+package lt.ekgame.storasbot.plugins;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 
+import lt.ekgame.storasbot.StorasBot;
 import lt.ekgame.storasbot.utils.Utils;
 import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
@@ -37,7 +38,7 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 	
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-		if (event.getAuthor().getId().equals(StorasBot.client.getSelfInfo().getId()))
+		if (event.getAuthor().equals(StorasBot.client.getSelfInfo()))
 			return; // ignore own messages
 		
 		String content = event.getMessage().getContent();

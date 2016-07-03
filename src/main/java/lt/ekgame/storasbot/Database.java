@@ -14,6 +14,8 @@ import org.skife.jdbi.v2.util.IntegerColumnMapper;
 
 import com.typesafe.config.Config;
 
+import lt.ekgame.storasbot.utils.BinTag;
+
 public class Database {
 	
 	private String host, port, database, username, password;

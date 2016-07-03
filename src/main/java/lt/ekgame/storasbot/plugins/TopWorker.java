@@ -1,4 +1,4 @@
-package lt.ekgame.storasbot;
+package lt.ekgame.storasbot.plugins;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -18,6 +18,7 @@ import org.tillerino.osuApiModel.Mods;
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 import org.tillerino.osuApiModel.OsuApiScore;
 
+import lt.ekgame.storasbot.StorasBot;
 import lt.ekgame.storasbot.utils.Utils;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.TextChannel;
