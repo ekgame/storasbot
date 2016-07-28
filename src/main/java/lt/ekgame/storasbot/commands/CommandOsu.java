@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import lt.ekgame.storasbot.StorasBot;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
+import lt.ekgame.storasbot.commands.engine.CommandFlags;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
 import lt.ekgame.storasbot.commands.engine.CommandReference;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
@@ -23,7 +24,7 @@ import lt.ekgame.storasbot.utils.TableRenderer;
 public class CommandOsu implements Command<BotCommandContext> {
 	
 	@Override
-	public String getHelp() {
+	public String getHelp(CommandFlags flags) {
 		return "Usage:\n"
 			 + "$osu <user>[,<user>,...]\n"
 			 + "$taiko <user>[,<user>,...]\n"
@@ -54,10 +55,8 @@ public class CommandOsu implements Command<BotCommandContext> {
 	public CommandResult execute(CommandIterator command, BotCommandContext context) {
 		Optional<String> argument = command.getEverything();
 		int mode = getMode(context.getLabel());
-		if (mode == -1) {
-			context.reply("_Something went very wrong. I'm sorry..._");
-			return CommandResult.FAIL;
-		}
+		if (mode == -1) 
+			return context.replyError("_Something went very wrong. I'm sorry..._");
 		
 		if (argument.isPresent()) {
 			List<String> usernames = Arrays.asList(argument.get().split(",")).stream()
@@ -66,10 +65,8 @@ public class CommandOsu implements Command<BotCommandContext> {
 				.limit(6)
 				.collect(Collectors.toList());
 			
-			if (usernames.isEmpty()) {
-				context.reply("_I need atleast one username. Work with me here._");
-				return CommandResult.FAIL;
-			}
+			if (usernames.isEmpty())
+				return context.replyError("I need atleast one username. Work with me here.");
 			
 			List<String> failed = new ArrayList<>();
 			List<OsuUser> users = new ArrayList<>();
@@ -116,8 +113,7 @@ public class CommandOsu implements Command<BotCommandContext> {
 			return failed.size() > 0 ? CommandResult.FAIL : CommandResult.OK;
 		}
 		else {
-			context.reply("_You don't know what you're doing, do you? Try `$help osu`._");
-			return CommandResult.FAIL;
+			return context.replyError("You don't know what you're doing, do you? Try `$help osu`.");
 		}
 	}
 }

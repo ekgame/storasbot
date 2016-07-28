@@ -11,6 +11,7 @@ import org.jsoup.select.Elements;
 
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
+import lt.ekgame.storasbot.commands.engine.CommandFlags;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
 import lt.ekgame.storasbot.commands.engine.CommandReference;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
@@ -22,7 +23,7 @@ public class CommandXKCD implements Command<BotCommandContext>  {
 	private static String XKCD_RANDOM = "http://c.xkcd.com/random/mobile_comic/";
 	
 	@Override
-	public String getHelp() {
+	public String getHelp(CommandFlags flags) {
 		return "Usage:\n"
 			 + "$xkcd [<id>]\n"
 			 + "\n"
@@ -39,28 +40,22 @@ public class CommandXKCD implements Command<BotCommandContext>  {
 		try {
 			Document doc = Jsoup.connect(link).get();
 			Elements elements = doc.select("img[id=comic]");
-			if (elements.size() == 0) {
-				context.reply("_That commic can not be diplayed._");
-				return CommandResult.FAIL;
-			}
+			if (elements.size() == 0)
+				return context.replyError("That commic can not be diplayed.");
 			
 			Element element = elements.get(0);
 			String image = element.attr("src");
-			if (image.isEmpty()) {
-				context.reply("_That comic can not be diplayed._");
-				return CommandResult.FAIL;
-			}
+			if (image.isEmpty())
+				return context.replyError("That comic can not be diplayed.");
 			
 			context.reply(image);
 			return CommandResult.OK;
 		}
 		catch (HttpStatusException e) {
-			context.reply("_xkcd responded with status code: " + e.getStatusCode() + "._");
-			return CommandResult.FAIL;
+			return context.replyError("xkcd responded with status code: " + e.getStatusCode() + ".");
 		}
 		catch (IOException e) {
-			context.reply("_Something went wrong, try again later._");
-			return CommandResult.FAIL;
+			return context.replyError("Something went wrong, try again later.");
 		}
 	}
 }

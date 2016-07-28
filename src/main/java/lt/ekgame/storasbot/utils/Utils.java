@@ -1,21 +1,45 @@
 package lt.ekgame.storasbot.utils;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
+
+import org.apache.http.entity.ContentType;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.body.MultipartBody;
+
+import lt.ekgame.storasbot.StorasBot;
+import net.dv8tion.jda.MessageBuilder;
+import net.dv8tion.jda.Permission;
+import net.dv8tion.jda.entities.Channel;
 import net.dv8tion.jda.entities.Guild;
+import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.User;
+import net.dv8tion.jda.entities.impl.JDAImpl;
+import net.dv8tion.jda.exceptions.PermissionException;
+import net.dv8tion.jda.handle.EntityBuilder;
+import net.dv8tion.jda.requests.Requester;
+import net.dv8tion.jda.utils.PermissionUtil;
 
 public class Utils {
 	
 	public static String escapeMarkdown(String text) {
-		return text.replace("*", "\\*").replace("`", "\u200B`\u200B");
+		return text.replace("*", "\\*").replace("`", "\u200B`\u200B").replace("&#39;", "'");
 	}
 	
 	public static String escapeMarkdownBlock(String text) {
-		return text.replace("`", "\u200B`\u200B");
+		return text.replace("`", "\u200B`\u200B").replace("&#39;", "'");
 	}
 	
 	public static <T> void addAllUniques(List<T> master, List<T> donor) {
@@ -71,4 +95,85 @@ public class Utils {
 		}
 		return Optional.empty();
 	}
+	
+	public static Message sendImage(Guild guild, Channel channel, BufferedImage image, Message message)
+    {
+		guild.checkVerification();
+        if (!PermissionUtil.checkPermission(guild.getJDA().getSelfInfo(), Permission.MESSAGE_WRITE, channel))
+            throw new PermissionException(Permission.MESSAGE_WRITE);
+        if (!PermissionUtil.checkPermission(guild.getJDA().getSelfInfo(), Permission.MESSAGE_ATTACH_FILES, channel))
+            throw new PermissionException(Permission.MESSAGE_ATTACH_FILES);
+        if(image == null)
+            throw new IllegalArgumentException("Provided image is null!");
+
+        JDAImpl api = (JDAImpl) guild.getJDA();
+        try
+        {
+        	ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        	ImageIO.write(image, "png", bytes);
+        	bytes.flush();
+            MultipartBody body = Unirest.post(Requester.DISCORD_API_PREFIX + "channels/" + channel.getId() + "/messages")
+                    .header("authorization", guild.getJDA().getAuthToken())
+                    .header("user-agent", Requester.USER_AGENT)
+                    .field("empty", "");
+            body.field("file", bytes.toByteArray(), ContentType.create("image/png"), "imge.png");
+            
+            bytes.close();
+            
+            if (message != null)
+                body.field("content", message.getRawContent()).field("tts", message.isTTS());
+
+            String dbg = String.format("Requesting %s -> %s\n\tPayload: image, message: %s, tts: %s\n\tResponse: ",
+                    body.getHttpRequest().getHttpMethod().name(), body.getHttpRequest().getUrl(), message == null ? "null" : message.getRawContent(), message == null ? "N/A" : message.isTTS());
+            String requestBody = body.asString().getBody();
+            Requester.LOG.trace(dbg + body);
+
+            try
+            {
+                JSONObject messageJson = new JSONObject(requestBody);
+                return new EntityBuilder(api).createMessage(messageJson);
+            }
+            catch (JSONException e)
+            {
+                Requester.LOG.fatal("Following json caused an exception: " + requestBody);
+                Requester.LOG.log(e);
+            }
+        }
+        catch (UnirestException | IOException e)
+        {
+            Requester.LOG.log(e);
+        }
+        return null;
+    }
+
+    public static void sendImageAsync(Guild guild, Channel channel, BufferedImage image, String message, Consumer<Message> callback)
+    {
+    	guild.checkVerification();
+        if (!PermissionUtil.checkPermission(guild.getJDA().getSelfInfo(), Permission.MESSAGE_WRITE, channel))
+            throw new PermissionException(Permission.MESSAGE_WRITE);
+        if (!PermissionUtil.checkPermission(guild.getJDA().getSelfInfo(), Permission.MESSAGE_ATTACH_FILES, channel))
+            throw new PermissionException(Permission.MESSAGE_ATTACH_FILES);
+
+        Thread thread = new Thread(() ->
+        {
+        	Message messageReturn = sendImage(guild, channel, image, new MessageBuilder().appendString(message).build());
+			if (callback != null)
+				callback.accept(messageReturn);
+        });
+        thread.setName("TextChannelImpl sendFileAsync Channel: " + channel.getId());
+        thread.setDaemon(true);
+        thread.start();
+    }
+    
+    public static boolean hasCommandPermission(Guild guild, User user, Permission perm) {
+    	if (StorasBot.operators.contains(user.getId()))
+    		return true;
+    	return PermissionUtil.checkPermission(user, perm, guild);
+    }
+    
+    public static boolean hasCommandPermission(Channel channel, User user, Permission perm) {
+    	if (StorasBot.operators.contains(user.getId()))
+    		return true;
+    	return PermissionUtil.checkPermission(user, perm, channel);
+    }
 }

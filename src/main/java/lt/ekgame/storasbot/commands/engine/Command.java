@@ -4,6 +4,6 @@ public interface Command<T> {
 	
 	CommandResult execute(CommandIterator command, T context);
 	
-	String getHelp();
+	String getHelp(CommandFlags flags);
 
 }

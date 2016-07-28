@@ -1,5 +1,7 @@
 package lt.ekgame.storasbot.commands.engine;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,10 +13,51 @@ public class CommandIterator {
 	private static Pattern LINE = Pattern.compile("^\\s*(.*)");
 	private static Pattern EVERYTHING = Pattern.compile("^\\s*(.*)", Pattern.DOTALL);
 	
+	private static Pattern FLAG = Pattern.compile("^\\s*\\-([^\\s:]+)");
+	private static Pattern FLAG_VALUE = Pattern.compile("^:(\"(.*?)\"|([^\\s]+))");
+	
 	private String command;
 	
 	public CommandIterator(String command) {
 		this.command = command;
+	}
+	
+	private Optional<String> getFlag() {
+		Matcher matcher = FLAG.matcher(command);
+		if (matcher.find()) {
+			command = command.substring(matcher.group(0).length());
+			return Optional.of(matcher.group(1));
+		}
+		return Optional.empty();
+	}
+	
+	private Optional<String> getFlagContent() {
+		Matcher matcher = FLAG_VALUE.matcher(command);
+		if (matcher.find()) {
+			command = command.substring(matcher.group(0).length());
+			return Optional.of(matcher.group(2) == null ? matcher.group(1) : matcher.group(2));
+		}
+		return Optional.empty();
+	}
+	
+	public CommandFlags getFlags() {
+		Map<String, String> flags = new HashMap<>();
+		
+		while (true) {
+			Optional<String> flag = getFlag();
+			if (!flag.isPresent()) {
+				if (getToken().isPresent()) continue;
+				else break;
+			}
+			
+			String key = flag.get().toLowerCase();
+			String value = getFlagContent().orElse(null);
+			if (flags.containsKey(key))
+				throw new IllegalArgumentException("Duplicate flag \""+key+"\".");
+			flags.put(key, value);
+		}
+		
+		return new CommandFlags(flags);
 	}
 	
 	public Optional<String> getToken() {

@@ -3,6 +3,7 @@ package lt.ekgame.storasbot.commands.eval;
 import lt.ekgame.storasbot.StorasBot;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
+import lt.ekgame.storasbot.commands.engine.CommandFlags;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
 import lt.ekgame.storasbot.commands.engine.CommandReference;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
@@ -11,7 +12,7 @@ import lt.ekgame.storasbot.commands.engine.CommandResult;
 public class CommandEval implements Command<BotCommandContext>  {
 
 	@Override
-	public String getHelp() {
+	public String getHelp(CommandFlags flags) {
 		return "Usage:\n"
 			 + "$eval <javascript expression/code>\n"
 			 + "or\n"

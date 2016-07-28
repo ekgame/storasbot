@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
+import lt.ekgame.storasbot.commands.engine.CommandFlags;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
 import lt.ekgame.storasbot.commands.engine.CommandReference;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
@@ -19,7 +20,7 @@ public class CommandRoll implements Command<BotCommandContext>  {
 	public Random random = new Random();
 	
 	@Override
-	public String getHelp() {
+	public String getHelp(CommandFlags flags) {
 		return "Usage:\n"
 			 + "$roll                          \n"
 			 + "$roll <max>[ <max> ...]       \n"

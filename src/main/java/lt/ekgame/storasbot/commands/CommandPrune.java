@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
+import lt.ekgame.storasbot.commands.engine.CommandFlags;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
 import lt.ekgame.storasbot.commands.engine.CommandReference;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
@@ -20,7 +21,7 @@ import net.dv8tion.jda.entities.User;
 public class CommandPrune implements Command<BotCommandContext> {
 
 	@Override
-	public String getHelp() {
+	public String getHelp(CommandFlags flags) {
 		return "Usage:\n"
 			 + "$prune <number> [<user>]\n"
 			 + "\n"
@@ -35,15 +36,13 @@ public class CommandPrune implements Command<BotCommandContext> {
 		TextChannel channel = context.getTextChannel();
 		User sender = context.getSender();
 		
-		if (channel.checkPermission(sender, Permission.MESSAGE_MANAGE)) {
+		if (Utils.hasCommandPermission(channel, sender, Permission.MESSAGE_MANAGE)) {
 			Optional<Integer> oNumber = command.getInteger();
 			Optional<String> oUserRaw = command.getEverything();
 			if (oNumber.isPresent()) {
 				int number = oNumber.get();
-				if (number < 2 || number > 100) {
-					context.reply("_The number has to be between 2 and 100 (inclusive)._");
-					return CommandResult.FAIL;
-				}
+				if (number < 2 || number > 100)
+					return context.replyError("The number has to be between 2 and 100 (inclusive).");
 				
 				List<Message> recent = channel.getHistory().retrieve();
 				List<Message> remove = new ArrayList<>();
@@ -58,12 +57,11 @@ public class CommandPrune implements Command<BotCommandContext> {
 								remove.add(message);
 						}
 						channel.deleteMessages(remove);
-						context.reply("_Deleted **" + number + "** messages by " + user.get().getAsMention() + "._");
+						context.reply("Deleted **" + number + "** messages by " + user.get().getAsMention() + ".");
 						return CommandResult.OK;
 					}
 					else {
-						context.reply("_Unknown user **" + Utils.escapeMarkdown(oUserRaw.get()) + "**._");
-						return CommandResult.FAIL;
+						return context.replyError("Unknown user **" + Utils.escapeMarkdown(oUserRaw.get()) + "**.");
 					}
 				}
 				else {
@@ -78,13 +76,11 @@ public class CommandPrune implements Command<BotCommandContext> {
 				}
 			}
 			else {
-				context.reply("_You don't know what you're doing. Try `$help prune`._");
-				return CommandResult.FAIL;
+				return context.replyError("You don't know what you're doing. Try `$help prune`.");
 			}
 		}
 		else {
-			context.reply("_I'm sorry, " + sender.getAsMention() + ", I can't let you do that._");
-			return CommandResult.FAIL;
+			return context.replyError("I'm sorry, " + sender.getAsMention() + ", I can't let you do that.");
 		}
 	}
 }

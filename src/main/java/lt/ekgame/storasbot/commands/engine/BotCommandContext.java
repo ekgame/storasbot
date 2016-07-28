@@ -60,4 +60,9 @@ public class BotCommandContext {
 			StorasBot.editMessage(reply, message);
 		}
 	}
+	
+	public CommandResult replyError(String message) {
+		reply("_" + message + "_");
+		return CommandResult.FAIL;
+	}
 }
