@@ -113,7 +113,7 @@ public class CommandListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
-		if (event.getAuthor().equals(StorasBot.client.getSelfInfo()))
+		if (event.getAuthor().equals(StorasBot.getJDA().getSelfInfo()))
 			return; // no recursive commands
 		
 		String command = getRawCommand(event.getMessage().getContent(), event.getGuild());

@@ -1,14 +1,21 @@
 package lt.ekgame.storasbot.plugins.osu_top;
 
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import lt.ekgame.storasbot.StorasBot;
-import lt.ekgame.storasbot.utils.OsuMode;
+import lt.ekgame.storasbot.utils.osu.OsuMode;
+import lt.ekgame.storasbot.utils.osu.OsuPlayer;
 import net.dv8tion.jda.events.Event;
 import net.dv8tion.jda.events.ReadyEvent;
 import net.dv8tion.jda.hooks.EventListener;
@@ -17,9 +24,11 @@ import net.dv8tion.jda.utils.SimpleLog;
 public class OsuTracker extends Thread implements EventListener {
 	
 	public static final SimpleLog LOG = SimpleLog.getLog("Top Worker");
+	public static final int TOP_OVERTAKE = 10;
 	
-	private OsuUserUpdater userUpdater = new OsuUserUpdater(20, 2000);
-	private MessageFormatter messageFormatter = new MessageFormatter();
+	private OsuPlayerUpdater userUpdater = new OsuPlayerUpdater(20, 500);
+	public static MessageFormatter messageFormatter = new MessageFormatter();
+	private ListMerger<ScoreHandler> listMerger = new ListMerger<>();
 	
 	public OsuTracker() {
 		
@@ -35,13 +44,24 @@ public class OsuTracker extends Thread implements EventListener {
 	public void run() {
 		LOG.info("Starting osu! tracker.");
 		while (true) {
-			//Map<String, OsuPlayer> checkedPlayers = new HashMap<>(); 
 			try {
-				List<TrackedCountry> trackers = StorasBot.database.getTrackedCountries();
-				List<CountryUpdater> updaters = groupCountries(trackers);
+				List<TrackedCountry> countryTrackers = StorasBot.getDatabase().getTrackedCountries();
+				List<TrackedPlayer> playerTrackers = StorasBot.getDatabase().getTrackedPlayers();
 				
-				for (CountryUpdater updater : updaters) 
-					updater.update(userUpdater);
+				Map<CountryGroup, List<TrackedCountry>> countries = groupCountries(countryTrackers);
+				Map<OsuUpdatablePlayer, List<? extends ScoreHandler>> players = new HashMap<>();
+				
+				for (Entry<CountryGroup, List<TrackedCountry>> entry : countries.entrySet()) {
+					try {
+						int top = entry.getValue().stream().mapToInt(e->e.getCountryTop()).max().getAsInt() + TOP_OVERTAKE;
+						List<OsuPlayer> countryPlayers = OsuLeaderboardScraper.scrapePlayers(entry.getKey().country, entry.getKey().mode, top);
+						for (OsuPlayer player : countryPlayers)
+							players.merge(new OsuUpdatablePlayer(player.getUserId(), player.getGamemode(), player), entry.getValue(), listMerger);
+						
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
 				
 				
 				LOG.info("Sleeping for 5 seconds.");
@@ -62,22 +82,16 @@ public class OsuTracker extends Thread implements EventListener {
 		}
 	}
 	
-	private List<CountryUpdater> groupCountries(List<TrackedCountry> trackers) {
+	private Map<CountryGroup, List<TrackedCountry>> groupCountries(List<TrackedCountry> trackers) {
 		return trackers.stream()
-				.collect(Collectors.groupingBy(t->new TrackedCountryGroup(t.getCountry(), t.getGamemode())))
-				.entrySet().stream().map(t->new CountryUpdater(t.getKey().country, t.getKey().mode, this,t.getValue()))
-				.collect(Collectors.toList());
+				.collect(Collectors.groupingBy(t->new CountryGroup(t.getCountry(), t.getGamemode())));
 	}
 	
-	public MessageFormatter getFormatter() {
-		return messageFormatter;
-	}
-	
-	private class TrackedCountryGroup {
+	private class CountryGroup {
 		private String country;
 		private OsuMode mode;
 
-		TrackedCountryGroup(String country, OsuMode mode) {
+		CountryGroup(String country, OsuMode mode) {
 			this.country = country;
 			this.mode = mode;
 		}
@@ -90,4 +104,30 @@ public class OsuTracker extends Thread implements EventListener {
 			return EqualsBuilder.reflectionEquals(this, other);
 		}
  	}
+	
+	private class OsuUpdatablePlayer {
+		private String userId;
+		private OsuMode mode;
+		private OsuPlayer countryPlayer;
+
+		OsuUpdatablePlayer(String userId, OsuMode mode, OsuPlayer countryPlayer) {
+			this.userId = userId;
+			this.mode = mode;
+			this.countryPlayer = countryPlayer;
+		}
+
+		public int hashCode() {
+			return new HashCodeBuilder(55, 23).append(userId).append(mode).toHashCode();
+		}
+ 	}
+	
+	private class ListMerger<T> implements BiFunction<List<? extends T>, List<? extends T>, List<? extends T>> {
+		@Override
+		public List<T> apply(List<? extends T> t, List<? extends T> u) {
+			List<T> result = new ArrayList<>();
+			result.addAll(t);
+			result.addAll(u);
+			return result;
+		}
+	}
 }

@@ -19,6 +19,7 @@ import org.apache.http.impl.client.HttpClients;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.typesafe.config.Config;
 
 import lt.ekgame.storasbot.StorasBot;
 import lt.ekgame.storasbot.utils.Utils;
@@ -51,20 +52,20 @@ public class BanchoStatusChecker extends Thread implements EventListener {
 	private List<String> currentTags;
 	
 	@SuppressWarnings("unchecked")
-	public BanchoStatusChecker() {
-		enabled = StorasBot.config.getBoolean("bancho.enabled");
-		timeout = StorasBot.config.getInt("bancho.timeout")*1000;
-		String host = StorasBot.config.getString("bancho.host");
+	public BanchoStatusChecker(Config config) {
+		enabled = config.getBoolean("bancho.enabled");
+		timeout = config.getInt("bancho.timeout")*1000;
+		String host = config.getString("bancho.host");
 		
-		requiredSuccesses = StorasBot.config.getInt("bancho.successes");
-		requiredFailures = StorasBot.config.getInt("bancho.failures");
-		postChannel = StorasBot.config.getString("bancho.channel");
+		requiredSuccesses = config.getInt("bancho.successes");
+		requiredFailures = config.getInt("bancho.failures");
+		postChannel = config.getString("bancho.channel");
 		
 		MustacheFactory mf = new DefaultMustacheFactory();
-		msgOffline = mf.compile(new StringReader(StorasBot.config.getString("bancho.msg-offline")), "offline");
-		msgOnline = mf.compile(new StringReader(StorasBot.config.getString("bancho.msg-online")), "online");
+		msgOffline = mf.compile(new StringReader(config.getString("bancho.msg-offline")), "offline");
+		msgOnline = mf.compile(new StringReader(config.getString("bancho.msg-online")), "online");
 		
-		tags = (List<List<String>>) StorasBot.config.getAnyRefList("bancho.tags");
+		tags = (List<List<String>>) config.getAnyRefList("bancho.tags");
 	    
 		try {
 			RequestConfig defaultRequestConfig = RequestConfig.custom()
@@ -132,7 +133,7 @@ public class BanchoStatusChecker extends Thread implements EventListener {
 	
 	private List<TextChannel> getChannels() {
 		List<TextChannel> channels = new ArrayList<>();
-		for (Guild guild : StorasBot.client.getGuilds())
+		for (Guild guild : StorasBot.getJDA().getGuilds())
 			for (TextChannel channel : guild.getTextChannels())
 				if (channel.getName().equals(postChannel))
 					channels.add(channel);
@@ -161,9 +162,7 @@ public class BanchoStatusChecker extends Thread implements EventListener {
 		writer.flush();
 		String message = writer.toString();
 		
-		for (TextChannel channel : getChannels()) {
+		for (TextChannel channel : getChannels())
 			StorasBot.sendMessage(channel, message);
-		}
 	}
-
 }

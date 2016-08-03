@@ -17,6 +17,8 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 import lt.ekgame.storasbot.utils.Utils;
+import lt.ekgame.storasbot.utils.osu.OsuPlayer;
+import lt.ekgame.storasbot.utils.osu.OsuScore;
 import net.dv8tion.jda.entities.Guild;
 
 public class MessageFormatter {

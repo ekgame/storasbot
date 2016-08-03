@@ -24,7 +24,7 @@ public class BeatmapCatche {
 			OsuApiBeatmap beatmap = null;
 			for (int i = 0; i < 3; i++) {
 				try {
-					beatmap = StorasBot.osuApi.getBeatmap(Integer.parseInt(beatmapId), OsuApiBeatmap.class);
+					beatmap = StorasBot.getOsuApi().getBeatmap(beatmapId);
 					break;
 				} catch (NumberFormatException | IOException e) {
 					e.printStackTrace();

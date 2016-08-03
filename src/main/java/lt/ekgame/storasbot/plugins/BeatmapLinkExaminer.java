@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 
 import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.plugins.osu_top.BeatmapCatche;
 import lt.ekgame.storasbot.utils.Utils;
 import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
@@ -38,7 +39,7 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 	
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-		if (event.getAuthor().equals(StorasBot.client.getSelfInfo()))
+		if (event.getAuthor().equals(StorasBot.getJDA().getSelfInfo()))
 			return; // ignore own messages
 		
 		String content = event.getMessage().getContent();
@@ -66,12 +67,12 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 	
 	String generateMessage(MatchResult map) throws IOException {
 		if (map.single) {
-			OsuApiBeatmap beatmap = StorasBot.osuApi.getBeatmap(map.id, OsuApiBeatmap.class);
+			OsuApiBeatmap beatmap = BeatmapCatche.getBeatmap(map.id);
 			if (beatmap == null) return null;
 			return generateTitle(beatmap) + generateVersion(beatmap);
 		}
 		else {
-			List<OsuApiBeatmap> beatmaps = StorasBot.osuApi.getBeatmapSet(map.id, OsuApiBeatmap.class);
+			List<OsuApiBeatmap> beatmaps = StorasBot.getOsuApi().getBeatmapSet(map.id);
 			if (beatmaps == null) return null;
 			
 			beatmaps.sort((a, b) -> ((int)a.getStarDifficulty()*100 - (int)b.getStarDifficulty()*100));
@@ -101,15 +102,15 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 		List<MatchResult> result = new LinkedList<>();
 		Matcher matcher = pattern.matcher(content);
 		while (matcher.find())
-			result.add(new MatchResult(single, Integer.parseInt(matcher.group(group))));
+			result.add(new MatchResult(single, matcher.group(group)));
 		return result;
 	}
 	
 	class MatchResult {
 		boolean single;
-		int id;
+		String id;
 		
-		MatchResult(boolean single, int id) {
+		MatchResult(boolean single, String id) {
 			this.single = single;
 			this.id = id;
 		}

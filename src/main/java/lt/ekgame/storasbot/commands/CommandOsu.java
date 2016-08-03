@@ -17,8 +17,9 @@ import lt.ekgame.storasbot.commands.engine.CommandFlags;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
 import lt.ekgame.storasbot.commands.engine.CommandReference;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
-import lt.ekgame.storasbot.utils.OsuUser;
 import lt.ekgame.storasbot.utils.TableRenderer;
+import lt.ekgame.storasbot.utils.osu.OsuMode;
+import lt.ekgame.storasbot.utils.osu.OsuUser;
 
 @CommandReference(isPrivate=true, isGuild=true, labels={"osu", "oss", "taiko", "catch", "ctb", "mania"})
 public class CommandOsu implements Command<BotCommandContext> {
@@ -43,19 +44,19 @@ public class CommandOsu implements Command<BotCommandContext> {
 		return result;
 	}
 	
-	private int getMode(String label) {
-		if (label.startsWith("o")) return 0;
-		if (label.startsWith("t")) return 1;
-		if (label.startsWith("c")) return 2;
-		if (label.startsWith("m")) return 3;
-		return -1;
+	private OsuMode getMode(String label) {
+		if (label.startsWith("o")) return OsuMode.OSU;
+		if (label.startsWith("t")) return OsuMode.TAIKO;
+		if (label.startsWith("c")) return OsuMode.CATCH;
+		if (label.startsWith("m")) return OsuMode.MANIA;
+		return null;
 	}
 
 	@Override
 	public CommandResult execute(CommandIterator command, BotCommandContext context) {
 		Optional<String> argument = command.getEverything();
-		int mode = getMode(context.getLabel());
-		if (mode == -1) 
+		OsuMode mode = getMode(context.getLabel());
+		if (mode == null) 
 			return context.replyError("_Something went very wrong. I'm sorry..._");
 		
 		if (argument.isPresent()) {
@@ -76,7 +77,7 @@ public class CommandOsu implements Command<BotCommandContext> {
 			
 			for (String username : usernames) {
 				try {
-					OsuUser user = StorasBot.osuApi.getUser(username, mode, OsuUser.class);
+					OsuUser user = StorasBot.getOsuApi().getUser(username, mode);
 					if (user != null) 
 						users.add(user);
 					else

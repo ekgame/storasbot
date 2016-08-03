@@ -13,8 +13,8 @@ import lt.ekgame.storasbot.commands.engine.CommandIterator;
 import lt.ekgame.storasbot.commands.engine.CommandReference;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
 import lt.ekgame.storasbot.plugins.osu_top.TrackedCountry;
-import lt.ekgame.storasbot.utils.OsuMode;
 import lt.ekgame.storasbot.utils.Utils;
+import lt.ekgame.storasbot.utils.osu.OsuMode;
 import net.dv8tion.jda.Permission;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.TextChannel;
@@ -36,7 +36,7 @@ public class CommandTrack implements Command<BotCommandContext>  {
 	
 	@Override
 	public String getHelp(CommandFlags flags) {
-		// TODO Auto-generated method stub
+		// TODO help page
 		return "TODO";
 	}
 
@@ -150,7 +150,7 @@ public class CommandTrack implements Command<BotCommandContext>  {
 				country == null ? null : country.getAlpha2(), gamemode, leaderboardTop, personalTop, ppThreshold);
 		
 		try {
-			StorasBot.database.addOrUpdateTrackedCountry(tracker);
+			StorasBot.getDatabase().addOrUpdateTrackedCountry(tracker);
 			context.reply(responseTrackingCountry(country, tracker));
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -190,7 +190,7 @@ public class CommandTrack implements Command<BotCommandContext>  {
 			if (countryCode == null || countryCode == CountryCode.UNDEFINED)
 				return context.replyError("\"" + country + "\" is not a country that I know of.");
 			
-			if (StorasBot.database.removeTrackedCountry(guild, channel, countryCode.getAlpha2(), mode)) {
+			if (StorasBot.getDatabase().removeTrackedCountry(guild, channel, countryCode.getAlpha2(), mode)) {
 				context.reply("No longer tracking " + countryCode.getName() + " " + mode.getName() + " leaderboard.");
 				return CommandResult.OK;
 			}
@@ -199,7 +199,7 @@ public class CommandTrack implements Command<BotCommandContext>  {
 		}
 		else if (sub.equals("global")) {
 			OsuMode mode = parseGamemode(oToRemove);
-			if (StorasBot.database.removeTrackedCountry(guild, channel, null, mode)) {
+			if (StorasBot.getDatabase().removeTrackedCountry(guild, channel, null, mode)) {
 				context.reply("No longer tracking the global " + mode.getName() + " leaderboard.");
 				return CommandResult.OK;
 			}

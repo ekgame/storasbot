@@ -28,7 +28,7 @@ public class CommandEval implements Command<BotCommandContext>  {
 	
 	@Override
 	public CommandResult execute(CommandIterator command, BotCommandContext context) {
-		StorasBot.client.addEventListener(new CodeExecutor(context.getMessage()));
+		StorasBot.getJDA().addEventListener(new CodeExecutor(context.getMessage()));
 		return CommandResult.OK; // Content changes are handled by the executor
 	}
 }

@@ -166,13 +166,13 @@ public class Utils {
     }
     
     public static boolean hasCommandPermission(Guild guild, User user, Permission perm) {
-    	if (StorasBot.operators.contains(user.getId()))
+    	if (StorasBot.isOperator(user))
     		return true;
     	return PermissionUtil.checkPermission(user, perm, guild);
     }
     
     public static boolean hasCommandPermission(Channel channel, User user, Permission perm) {
-    	if (StorasBot.operators.contains(user.getId()))
+    	if (StorasBot.isOperator(user))
     		return true;
     	return PermissionUtil.checkPermission(user, perm, channel);
     }

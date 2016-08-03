@@ -161,7 +161,7 @@ public class CodeExecutor extends ListenerAdapter  {
 	@Override
 	public void onGuildMessageUpdate(GuildMessageUpdateEvent event) {
 		if (System.currentTimeMillis() - lastUpdate > 10*60*1000) {
-			StorasBot.client.removeEventListener(this);
+			StorasBot.getJDA().removeEventListener(this);
 		}
 		else if (event.getMessage().getId().equals(original.getId())) {
 			lastUpdate = System.currentTimeMillis();

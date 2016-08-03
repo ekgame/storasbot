@@ -2,6 +2,9 @@ package lt.ekgame.storasbot.plugins.osu_top;
 
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 
+import lt.ekgame.storasbot.utils.osu.OsuPlayer;
+import lt.ekgame.storasbot.utils.osu.OsuScore;
+
 public class OsuScoreUpdate {
 	
 	private OsuPlayer oldPlayer, newPlayer;

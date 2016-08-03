@@ -1,6 +1,5 @@
 package lt.ekgame.storasbot.commands;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -35,7 +34,6 @@ import lt.ekgame.storasbot.utils.Utils;
 
 import net.dv8tion.jda.OnlineStatus;
 import net.dv8tion.jda.entities.Guild;
-import net.dv8tion.jda.entities.TextChannel;
 
 @CommandReference(isGuild=true, labels = {"server", "guild"})
 public class CommandServer implements Command<BotCommandContext> {
@@ -68,7 +66,7 @@ public class CommandServer implements Command<BotCommandContext> {
 	@Override
 	public CommandResult execute(CommandIterator command, BotCommandContext context) {
 		Guild guild = context.getGuild();
-		TextChannel channel = context.getTextChannel();
+		//TextChannel channel = context.getTextChannel();
 		
 		long users   = guild.getUsers().size();
 		long online  = guild.getUsers().stream().filter(u->u.getOnlineStatus()==OnlineStatus.ONLINE).count();
@@ -100,7 +98,7 @@ public class CommandServer implements Command<BotCommandContext> {
 	private String getBinsInfo(Guild guild) {
 		String binsInfo = "UNKNOWN";
 		try {
-			List<Pair<String, Long>> mostUsedBins = StorasBot.database.getTopBins(guild);
+			List<Pair<String, Long>> mostUsedBins = StorasBot.getDatabase().getTopBins(guild);
 			if (mostUsedBins.size() == 0) {
 				binsInfo = "NONE DEFINED";
 			}

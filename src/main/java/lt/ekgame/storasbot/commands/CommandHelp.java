@@ -28,7 +28,7 @@ public class CommandHelp implements Command<BotCommandContext> {
 		Optional<String> token = command.getToken();
 		if (token.isPresent()) {
 			String commandLabel = token.get();
-			Optional<CommandDefinition> oCommand = StorasBot.commandHandler.getCommandByName(commandLabel);
+			Optional<CommandDefinition> oCommand = StorasBot.getCommandHandler().getCommandByName(commandLabel);
 			if (oCommand.isPresent()) {
 				CommandFlags flags = command.getFlags();
 				Command<BotCommandContext> theCommand = oCommand.get().getInstance();

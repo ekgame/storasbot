@@ -13,13 +13,13 @@ import org.skife.jdbi.v2.PreparedBatch;
 
 import com.typesafe.config.Config;
 
-import lt.ekgame.storasbot.plugins.osu_top.OsuPlayer;
-import lt.ekgame.storasbot.plugins.osu_top.OsuScore;
 import lt.ekgame.storasbot.plugins.osu_top.TrackedCountry;
 import lt.ekgame.storasbot.plugins.osu_top.TrackedPlayer;
 import lt.ekgame.storasbot.utils.BinTag;
-import lt.ekgame.storasbot.utils.OsuMode;
-import net.dv8tion.jda.entities.Channel;
+import lt.ekgame.storasbot.utils.osu.OsuMode;
+import lt.ekgame.storasbot.utils.osu.OsuPlayer;
+import lt.ekgame.storasbot.utils.osu.OsuPlayerIdentifier;
+import lt.ekgame.storasbot.utils.osu.OsuScore;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.TextChannel;
 
@@ -38,6 +38,10 @@ public class Database {
 		MariaDbDataSource ds = new MariaDbDataSource();
 		ds.setUrl("jdbc:mysql://" + host + ":" + port + "/" + database + "?user=" + username + "&password=" + password);
 		dbi = new DBI(ds);
+	}
+	
+	public void testConnection() {
+		dbi.open();
 	}
 	
 	// --------- osu! ranking tracker --------- //
@@ -99,15 +103,14 @@ public class Database {
 		}
 	}
 	
-	public OsuPlayer getTrackedUser(String userId, OsuMode mode) {
+	public OsuPlayer getTrackedUser(OsuPlayerIdentifier identifier) {
 		try (Handle handle = dbi.open()) {
-			List<Map<String, Object>> rawData = handle.select("SELECT user_id, username, country, performance, global_rank, country_rank, accuracy FROM osu_tracked_users WHERE user_id=? AND gamemode=?", userId, mode.getValue());
+			List<Map<String, Object>> rawData = handle.select("SELECT user_id, username, country, performance, global_rank, country_rank, accuracy FROM osu_tracked_users WHERE user_id=? AND gamemode=?", identifier.getUserId(), identifier.getModeValue());
 			if (rawData.size() == 0)
 				return null;
 			Map<String, Object> item = rawData.get(0);
 			return new OsuPlayer(
-					(String)item.get("user_id"),
-					 mode,
+					identifier,
 					(String)item.get("username"),
 					(String)item.get("country"),
 					(double)item.get("performance"),
@@ -145,8 +148,7 @@ public class Database {
 			
 			return rawData.stream()
 				.map((item)->new OsuPlayer(
-					(String)item.get("user_id"),
-					 mode,
+					OsuPlayerIdentifier.of((String)item.get("user_id"), mode),
 					(String)item.get("username"),
 					(String)item.get("country"),
 					(double)item.get("performance"),
@@ -157,16 +159,16 @@ public class Database {
 		}
 	}
 	
-	public void addScores(String userId, OsuMode mode, List<OsuScore> scores) throws SQLException {
+	public void addScores(OsuPlayerIdentifier identifier, List<OsuScore> scores) throws SQLException {
 		try (Handle handle = dbi.open()) {
 			PreparedBatch batch = handle.prepareBatch("INSERT INTO osu_tracked_plays (user_id, beatmap_id, performance, mods, gamemode, count300, count100, count50, count_miss, score, max_combo, timestamp, rank, personal_top) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 			for (OsuScore score : scores) {
 				batch.add()
-					.bind(0, userId)
+					.bind(0, identifier.getUserId())
 					.bind(1, score.getBeatmapId())
 					.bind(2, score.getPerformance())
 					.bind(3, score.getMods())
-					.bind(4, mode.getValue())
+					.bind(4, identifier.getModeValue())
 					.bind(5, score.getCount300())
 					.bind(6, score.getCount100())
 					.bind(7, score.getCount50())
@@ -181,7 +183,7 @@ public class Database {
 		}
 	}
 	
-	public void updateScores(String userId, OsuMode mode, List<OsuScore> scores) throws SQLException {
+	public void updateScores(OsuPlayerIdentifier identifier, List<OsuScore> scores) throws SQLException {
 		try (Handle handle = dbi.open()) {
 			PreparedBatch batch = handle.prepareBatch("UPDATE osu_tracked_plays SET performance=?, mods=?, count300=?, count100=?, count50=?, count_miss=?, score=?, max_combo=?, timestamp=?, rank=?, personal_top=? WHERE user_id=? AND beatmap_id=? AND gamemode=?");
 			for (OsuScore score : scores) {
@@ -195,19 +197,19 @@ public class Database {
 					.bind(6, score.getScore())
 					.bind(7, score.getMaxCombo())
 					.bind(8, score.getTimestamp())
-					.bind(9, userId)
+					.bind(9, identifier.getUserId())
 					.bind(10, score.getRank())
 					.bind(11, score.getPersonalTopPlace())
 					.bind(12, score.getBeatmapId())
-					.bind(13, mode.getValue());
+					.bind(13, identifier.getModeValue());
 			}
 			batch.execute();
 		}
 	}
 	
-	public List<OsuScore> getUserScores(String userId, OsuMode mode) throws SQLException {
+	public List<OsuScore> getUserScores(OsuPlayerIdentifier identifier) throws SQLException {
 		try (Handle handle = dbi.open()) {
-			List<Map<String, Object>> rawData = handle.select("SELECT beatmap_id, performance, mods, count300, count100, count50, count_miss, score, max_combo, timestamp, rank, personal_top FROM osu_tracked_plays WHERE user_id=? AND gamemode=?", userId, mode.getValue());
+			List<Map<String, Object>> rawData = handle.select("SELECT beatmap_id, performance, mods, count300, count100, count50, count_miss, score, max_combo, timestamp, rank, personal_top FROM osu_tracked_plays WHERE user_id=? AND gamemode=?", identifier.getUserId(), identifier.getModeValue());
 			return rawData.stream()
 				.map((item)->new OsuScore(
 					(String)item.get("beatmap_id"),

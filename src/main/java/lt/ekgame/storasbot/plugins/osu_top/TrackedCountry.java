@@ -5,11 +5,11 @@ import java.util.List;
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 
 import lt.ekgame.storasbot.StorasBot;
-import lt.ekgame.storasbot.utils.OsuMode;
+import lt.ekgame.storasbot.utils.osu.OsuMode;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.TextChannel;
 
-public class TrackedCountry {
+public class TrackedCountry implements ScoreHandler {
 	/*
 	 * is country == null then it's global
 	 */
@@ -65,7 +65,7 @@ public class TrackedCountry {
 		return minPerformance;
 	}
 	
-	public void handleScoreUpdates(OsuTracker tracker, List<OsuScoreUpdate> scores) {
+	public void handleScoreUpdates(List<OsuScoreUpdate> scores) {
 		for (OsuScoreUpdate score : scores) {
 			int leaderboardRank = country == null ? score.getNewPlayer().getGlobalRank() : score.getNewPlayer().getCountryRank();
 			boolean isCountryTop  = leaderboardRank <= countryTop;
@@ -74,15 +74,15 @@ public class TrackedCountry {
 			boolean isNew = (System.currentTimeMillis() - score.getNewScore().getTimestamp()) < 1000*60*60*24;
 			
 			if (isNew && isCountryTop && (isPersonalTop || isPerformance)) {
-				Guild guild = StorasBot.client.getGuildById(guildId);
-				TextChannel channel = StorasBot.client.getTextChannelById(channelId);
+				Guild guild = StorasBot.getJDA().getGuildById(guildId);
+				TextChannel channel = StorasBot.getJDA().getTextChannelById(channelId);
 				if (guild == null || channel == null) {
 					// TODO remove tracker from db
 					break;
 				}
 				OsuApiBeatmap beatmap = score.getBeamap();
 				if (beatmap == null) continue;
-				String message = tracker.getFormatter().format(guild, score, beatmap);
+				String message = OsuTracker.messageFormatter.format(guild, score, beatmap);
 				StorasBot.sendMessage(channel, message);
 			}
 		}

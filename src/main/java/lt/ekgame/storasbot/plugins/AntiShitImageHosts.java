@@ -22,7 +22,7 @@ public class AntiShitImageHosts extends ListenerAdapter {
 	
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-		if (event.getAuthor().equals(StorasBot.client.getSelfInfo()))
+		if (event.getAuthor().equals(StorasBot.getJDA().getSelfInfo()))
 			return; // ignore own messages
 		
 		String content = event.getMessage().getContent();

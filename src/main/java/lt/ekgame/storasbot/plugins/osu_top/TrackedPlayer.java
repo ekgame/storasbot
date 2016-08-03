@@ -1,8 +1,10 @@
 package lt.ekgame.storasbot.plugins.osu_top;
 
-import lt.ekgame.storasbot.utils.OsuMode;
+import java.util.List;
 
-public class TrackedPlayer {
+import lt.ekgame.storasbot.utils.osu.OsuMode;
+
+public class TrackedPlayer implements ScoreHandler {
 
 	private String guildId, channelId, userId;
 	private int personalTop, minPP;
@@ -39,5 +41,10 @@ public class TrackedPlayer {
 	
 	public int getMinPerformance() {
 		return minPP;
+	}
+
+	@Override
+	public void handleScoreUpdates(List<OsuScoreUpdate> scores) {
+		// TODO Auto-generated method stub
 	}
 }
