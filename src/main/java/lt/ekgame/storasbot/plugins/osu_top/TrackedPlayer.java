@@ -2,19 +2,18 @@ package lt.ekgame.storasbot.plugins.osu_top;
 
 import java.util.List;
 
-import lt.ekgame.storasbot.utils.osu.OsuMode;
+import lt.ekgame.storasbot.utils.osu.OsuPlayerIdentifier;
 
 public class TrackedPlayer implements ScoreHandler {
 
-	private String guildId, channelId, userId;
+	private String guildId, channelId;
 	private int personalTop, minPP;
-	private OsuMode gamemode;
+	private OsuPlayerIdentifier identifier;
 	
-	public TrackedPlayer(String guildId, String channelId, String userId, OsuMode gamemode, int personalTop, int minPP) {
+	public TrackedPlayer(String guildId, String channelId, OsuPlayerIdentifier identifier, int personalTop, int minPP) {
 		this.guildId = guildId;
 		this.channelId = channelId;
-		this.userId = userId;
-		this.gamemode = gamemode;
+		this.identifier = identifier;
 		this.personalTop = personalTop;
 		this.minPP = minPP;
 	}
@@ -27,12 +26,8 @@ public class TrackedPlayer implements ScoreHandler {
 		return channelId;
 	}
 
-	public String getUserId() {
-		return userId;
-	}
-
-	public OsuMode getGamemode() {
-		return gamemode;
+	public OsuPlayerIdentifier getIdentifier() {
+		return identifier;
 	}
 
 	public int getPersonalTop() {

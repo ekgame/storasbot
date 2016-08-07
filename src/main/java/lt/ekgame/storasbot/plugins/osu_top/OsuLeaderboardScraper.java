@@ -21,14 +21,20 @@ public class OsuLeaderboardScraper {
 	private static final String RANK_LISTING_GLOBAL = "http://osu.ppy.sh/p/pp?&m=%d&page=%d";
 	
 	public static List<OsuPlayer> scrapePlayers(String country, OsuMode mode, int numTop) throws IOException {
-		int pages = (numTop / 50) + 1;
 		List<OsuPlayer> result = new ArrayList<>();
-		for (int i = 0; i < pages; i++)
-			result.addAll(scrapePlayers(i+1, country, mode));
+		int remaining = numTop;
+		for (int i = 0; i < 3; i++) {
+			List<OsuPlayer> players = scrapePlayers(i+1, country, mode, remaining);
+			result.addAll(players);
+			remaining -= players.size();
+			if (remaining <= 0)
+				break;
+		}
+		
 		return result;
 	}
 	
-	private static List<OsuPlayer> scrapePlayers(int page, String country, OsuMode mode) throws IOException {
+	private static List<OsuPlayer> scrapePlayers(int page, String country, OsuMode mode, int remaining) throws IOException {
 		List<OsuPlayer> result = new ArrayList<>();
 		String url;
 		if (country == null)
@@ -59,6 +65,9 @@ public class OsuLeaderboardScraper {
 			double accuracy = Double.parseDouble(accuracyRaw.substring(0, accuracyRaw.length()-1));
 			int performance = Integer.parseInt(performanceRaw.substring(0, performanceRaw.length()-2).replace(",", ""));
 			result.add(new OsuPlayer(OsuPlayerIdentifier.of(userId, mode), username, country, (page-1)*50+i, performance, accuracy));
+			remaining--;
+			if (remaining <= 0)
+				break;
 		}
 		return result;
 	}

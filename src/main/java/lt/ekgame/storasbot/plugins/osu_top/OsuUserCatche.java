@@ -1,6 +1,7 @@
 package lt.ekgame.storasbot.plugins.osu_top;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,17 +10,21 @@ import lt.ekgame.storasbot.StorasBot;
 import lt.ekgame.storasbot.utils.osu.OsuMode;
 import lt.ekgame.storasbot.utils.osu.OsuPlayer;
 import lt.ekgame.storasbot.utils.osu.OsuPlayerIdentifier;
+import net.dv8tion.jda.utils.SimpleLog;
 
-public class OsuPlayerCatche {
+public class OsuUserCatche {
 	
-	private Map<OsuPlayerIdentifier, OsuPlayer> catche;
+	public static final SimpleLog LOG = SimpleLog.getLog("Player Catche");
+	private Map<OsuPlayerIdentifier, OsuPlayer> catche = new HashMap<>();
 	
-	public OsuPlayerCatche() throws SQLException {
+	public OsuUserCatche() throws SQLException {
+		LOG.info("Loading catche.");
 		Database db = StorasBot.getDatabase();
 		addPlayers(db.getTrackedCountryPlayers(null, OsuMode.OSU));
 		addPlayers(db.getTrackedCountryPlayers(null, OsuMode.TAIKO));
 		addPlayers(db.getTrackedCountryPlayers(null, OsuMode.CATCH));
 		addPlayers(db.getTrackedCountryPlayers(null, OsuMode.MANIA));
+		LOG.info("Catche loaded (" + catche.entrySet().size() + ").");
 	}
 	
 	private void addPlayers(List<OsuPlayer> players) {
@@ -29,7 +34,7 @@ public class OsuPlayerCatche {
 	
 	public void updatePlayer(OsuPlayer player) {
 		synchronized (catche) {
-			catche.merge(player.getIdentifier(), player, (u, t) -> t);
+			catche.put(player.getIdentifier(), player);
 		}
 	}
 

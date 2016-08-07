@@ -1,6 +1,5 @@
 package lt.ekgame.storasbot.utils.osu;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class OsuPlayerIdentifier {
@@ -44,10 +43,6 @@ public class OsuPlayerIdentifier {
 		if (obj == this) return true;
 		if (obj.getClass() != getClass()) return false;
 		OsuPlayerIdentifier other = (OsuPlayerIdentifier) obj;
-		return new EqualsBuilder()
-				.appendSuper(super.equals(obj))
-				.append(userId, other.userId)
-				.append(mode, other.mode)
-				.isEquals();
+		return userId.equals(other.userId) && mode == other.mode;
 	}
 }

@@ -17,6 +17,7 @@ import lt.ekgame.storasbot.plugins.BanchoStatusChecker;
 import lt.ekgame.storasbot.plugins.BeatmapLinkExaminer;
 import lt.ekgame.storasbot.plugins.GameChanger;
 import lt.ekgame.storasbot.plugins.osu_top.OsuTracker;
+import lt.ekgame.storasbot.plugins.osu_top.OsuUserCatche;
 import lt.ekgame.storasbot.utils.osu.OsuApi;
 import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.JDABuilder;
@@ -24,6 +25,8 @@ import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.MessageChannel;
 import net.dv8tion.jda.entities.User;
+import net.dv8tion.jda.events.ReadyEvent;
+import net.dv8tion.jda.hooks.ListenerAdapter;
 import net.dv8tion.jda.utils.SimpleLog;
 
 public class StorasBot {
@@ -32,6 +35,7 @@ public class StorasBot {
 	private static Database database;
 	private static Config config;
 	private static OsuApi osuApi;
+	private static OsuUserCatche osuUserCatche;
 	private static CommandListener commandHandler;
 	private static List<String> operators = new ArrayList<>();
 	
@@ -40,14 +44,20 @@ public class StorasBot {
 			config = ConfigFactory.parseFile(new File(args[0])); // Very important that this is first
 			database = new Database(config);
 			database.testConnection();
+			osuApi = new OsuApi(config);
+			osuUserCatche = new OsuUserCatche();
 			
 			String token = config.getString("api.discord");
 			operators = config.getStringList("general.operators");
 			client = new JDABuilder().setBotToken(token).buildAsync();
 			
-			osuApi = new OsuApi(config);
+			client.addEventListener(new ListenerAdapter() {
+				@Override
+				public void onReady(ReadyEvent event) {
+					new OsuTracker(osuUserCatche).start();
+				}
+			});
 			
-			client.addEventListener(new OsuTracker());
 			client.addEventListener(commandHandler = new CommandListener());
 			client.addEventListener(new BeatmapLinkExaminer());
 			client.addEventListener(new AntiShitImageHosts());

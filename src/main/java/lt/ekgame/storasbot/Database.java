@@ -83,8 +83,7 @@ public class Database {
 				.map((row)->new TrackedPlayer(
 					(String) row.get("guild_id"), 
 					(String) row.get("channel_id"), 
-					(String) row.get("user_id"), 
-					OsuMode.fromValue((int) row.get("gamemode")), 
+					OsuPlayerIdentifier.of((String) row.get("user_id"), OsuMode.fromValue((int) row.get("gamemode"))),
 					(int)    row.get("top_number"),
 					(int)    row.get("min_pp")
 				)).collect(Collectors.toList());
@@ -96,8 +95,8 @@ public class Database {
 			handle.execute("INSERT INTO osu_country_tracker (guild_id, channel_id, user_id, gamemode, top_number) VALUES (?, ?, ?, ?, ?)",
 				tracked.getGuildId(),
 				tracked.getChannelId(),
-				tracked.getUserId(),
-				tracked.getGamemode(),
+				tracked.getIdentifier().getUserId(),
+				tracked.getIdentifier().getMode(),
 				tracked.getPersonalTop()
 			);
 		}
@@ -234,11 +233,11 @@ public class Database {
 	public boolean addOrUpdateTrackedPlayer(TrackedPlayer tracker) throws SQLException {
 		try (Handle handle = dbi.open()) {
 			List<Map<String, Object>> rawData = handle.select("SELECT id FROM osu_user_tracker WHERE guild_id=? AND channel_id=? AND user_id=? AND gamemode=?",
-					tracker.getGuildId(), tracker.getChannelId(), tracker.getUserId(), tracker.getGamemode());
+					tracker.getGuildId(), tracker.getChannelId(), tracker.getIdentifier().getUserId(), tracker.getIdentifier().getMode());
 			
 			if (rawData.size() == 0) {
 				handle.insert("INSERT INTO osu_user_tracker (guild_id, channel_id, user_id, gamemode, top_number, min_pp) VALUES (?,?,?,?,?,?)",
-					tracker.getGuildId(), tracker.getChannelId(), tracker.getUserId(), tracker.getGamemode().getValue(),
+					tracker.getGuildId(), tracker.getChannelId(), tracker.getIdentifier().getUserId(), tracker.getIdentifier().getMode().getValue(),
 					tracker.getPersonalTop(), tracker.getMinPerformance());
 				return true;
 			}
