@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 
 import lt.ekgame.storasbot.StorasBot;
-import lt.ekgame.storasbot.plugins.osu_top.BeatmapCatche;
 import lt.ekgame.storasbot.utils.Utils;
+import lt.ekgame.storasbot.utils.osu.OsuBeatmapCatche;
 import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.hooks.ListenerAdapter;
@@ -67,7 +67,7 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 	
 	String generateMessage(MatchResult map) throws IOException {
 		if (map.single) {
-			OsuApiBeatmap beatmap = BeatmapCatche.getBeatmap(map.id);
+			OsuApiBeatmap beatmap = OsuBeatmapCatche.getBeatmap(map.id);
 			if (beatmap == null) return null;
 			return generateTitle(beatmap) + generateVersion(beatmap);
 		}

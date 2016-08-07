@@ -1,4 +1,4 @@
-package lt.ekgame.storasbot.plugins.osu_top;
+package lt.ekgame.storasbot.utils.osu;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import org.tillerino.osuApiModel.OsuApiBeatmap;
 
 import lt.ekgame.storasbot.StorasBot;
 
-public class BeatmapCatche {
+public class OsuBeatmapCatche {
 	
 	private static Map<String, OsuApiBeatmap> catche = new HashMap<>();
 	
