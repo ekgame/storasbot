@@ -33,6 +33,10 @@ public class OsuUpdatablePlayer implements ScoreHandler {
 		scoreHandlers.add(handler);
 	}
 	
+	public void addScoreHandlers(List<? extends ScoreHandler> handlers) {
+		scoreHandlers.addAll(handlers);
+	}
+	
 	public OsuPlayerIdentifier getIdentifier() {
 		return identifier;
 	}

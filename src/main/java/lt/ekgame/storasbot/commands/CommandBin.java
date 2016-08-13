@@ -50,10 +50,8 @@ public class CommandBin implements Command<BotCommandContext> {
 	@Override
 	public CommandResult execute(CommandIterator command, BotCommandContext context) {
 		Optional<String> oSub = command.getToken();
-		if (!oSub.isPresent()) {
-			context.reply("*You don't know what you're doing, do you? Try `$help bin`.*");
-			return CommandResult.FAIL;
-		}
+		if (!oSub.isPresent())
+			return context.replyError("You don't know what you're doing, do you? Try `$help bin`.");
 		
 		String sub = oSub.get().toLowerCase();
 		if (sub.equals("list") || sub.equals("search"))        return list(command,   context);
@@ -74,17 +72,15 @@ public class CommandBin implements Command<BotCommandContext> {
 		Guild guild = context.getGuild();
 		
 		Optional<String> oTag = command.getToken();
-		if (!oTag.isPresent()) {
-			context.reply("_What would you like me to delete?_");
-			return CommandResult.FAIL;
-		}
+		if (!oTag.isPresent())
+			return context.replyError("What would you like me to delete?");
+		
 		String tag = oTag.get();
 		
 		try {
 			BinTag bin = StorasBot.getDatabase().getBin(guild, tag);
 			if (bin == null)  {
-				context.reply("_Can't delete: bin doesn't exist._");
-				return CommandResult.FAIL;
+				return context.replyError("Can't delete: bin doesn't exist.");
 			}
 			
 			if (canEdit(guild, sender, bin.getUserId())) {
@@ -93,8 +89,7 @@ public class CommandBin implements Command<BotCommandContext> {
 				return CommandResult.OK;
 			}
 			else {
-				context.reply("_I'm sorry, " + sender.getAsMention() + ", I can't let you do that._");
-				return CommandResult.FAIL;
+				return context.replyError("I'm sorry, " + sender.getAsMention() + ", I can't let you do that.");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -109,25 +104,19 @@ public class CommandBin implements Command<BotCommandContext> {
 		Optional<String> oTag = command.getToken();
 		Optional<String> oContent = command.getEverything();
 		
-		if (!oTag.isPresent()) {
-			context.reply("_What would you like me to edit?_");
-			return CommandResult.FAIL;
-		}
+		if (!oTag.isPresent())
+			return context.replyError("What would you like me to edit?");
 		
-		if (!oContent.isPresent()) {
-			context.reply("_What would you like me to change that to?_");
-			return CommandResult.FAIL;
-		}
+		if (!oContent.isPresent())
+			return context.replyError("What would you like me to change that to");
 		
 		String tag = oTag.get();
 		String content = oContent.get();
 		
 		try {
 			BinTag bin = StorasBot.getDatabase().getBin(guild, tag);
-			if (bin == null)  {
-				context.reply("_That bin doesn't exist. Use `add` to create it._");
-				return CommandResult.FAIL;
-			}
+			if (bin == null)
+				return context.replyError("That bin doesn't exist. Use `add` to create it.");
 			
 			if (canEdit(guild, sender, bin.getUserId())) {
 				StorasBot.getDatabase().editBin(guild, bin.getId(), content);
@@ -135,8 +124,7 @@ public class CommandBin implements Command<BotCommandContext> {
 				return CommandResult.OK;
 			}
 			else {
-				context.reply("_I'm sorry, " + sender.getAsMention() + ", I can't let you do that._");
-				return CommandResult.FAIL;
+				return context.replyError("I'm sorry, " + sender.getAsMention() + ", I can't let you do that.");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -151,30 +139,22 @@ public class CommandBin implements Command<BotCommandContext> {
 		Optional<String> oTag = command.getToken();
 		Optional<String> oContent = command.getEverything();
 		
-		if (!oTag.isPresent()) {
-			context.reply("_You have to give a name to the thing you want to add._");
-			return CommandResult.FAIL;
-		}
+		if (!oTag.isPresent())
+			return context.replyError("You have to give a name to the thing you want to add.");
 		
-		if (!oContent.isPresent()) {
-			context.reply("_What would you like me to add?_");
-			return CommandResult.FAIL;
-		}
+		if (!oContent.isPresent())
+			return context.replyError("What would you like me to add?");
 		
 		String tag = oTag.get();
 		String content = oContent.get();
 		
 		try {
 			BinTag bin = StorasBot.getDatabase().getBin(guild, tag);
-			if (bin != null)  {
-				context.reply("_That bin already taken._");
-				return CommandResult.FAIL;
-			}
+			if (bin != null)
+				return context.replyError("That bin already taken.");
 			
-			if (subCommands.contains(tag)) {
-				context.reply("_That bin tag is not allowed._");
-				return CommandResult.FAIL;
-			}
+			if (subCommands.contains(tag))
+				return context.replyError("That bin tag is not allowed.");
 
 			StorasBot.getDatabase().addBin(guild, sender.getId(), tag, content);
 			context.reply(":ok_hand:");
@@ -189,10 +169,8 @@ public class CommandBin implements Command<BotCommandContext> {
 		Guild guild = context.getGuild();
 		try {
 			BinTag bin = StorasBot.getDatabase().getBin(guild, tag);
-			if (bin == null)  {
-				context.reply("*That bin doesn't exist.*");
-				return CommandResult.FAIL;
-			}
+			if (bin == null)
+				return context.replyError("That bin doesn't exist.");
 			
 			StorasBot.getDatabase().incrementBinUsage(guild, bin.getId());
 			context.reply(bin.getContent());
@@ -211,15 +189,12 @@ public class CommandBin implements Command<BotCommandContext> {
 		try {
 			Guild guild = context.getGuild();
 			long count = StorasBot.getDatabase().getBinsCount(guild);
-			if (count == 0) {
-				context.reply("_The bin is empty._");
-				return CommandResult.OK;
-			}
+			if (count == 0)
+				
+				return context.replyOk("The bin is empty.");
 			long pages = count/PAGE_SIZE + 1;
-			if (page > pages) {
-				context.reply("_That page doesn't exist._");
-				return CommandResult.FAIL;
-			}
+			if (page > pages)
+				return context.replyError("That page doesn't exist.");
 			else {
 				List<String> tags = StorasBot.getDatabase().getBinList(guild, PAGE_SIZE, page);
 				String result = Utils.escapeMarkdownBlock(tags.stream().collect(Collectors.joining(", ")));
@@ -235,18 +210,15 @@ public class CommandBin implements Command<BotCommandContext> {
 
 	private CommandResult source(CommandIterator command, BotCommandContext context) {
 		Optional<String> oTag = command.getToken();
-		if (!oTag.isPresent()) {
-			context.reply("_What do you want to see?_");
-			return CommandResult.FAIL;
-		}
+		if (!oTag.isPresent())
+			return context.replyError("What do you want to see?");
+		
 		String tag = oTag.get();
 		Guild guild = context.getGuild();
 		try {
 			BinTag bin = StorasBot.getDatabase().getBin(guild, tag);
-			if (bin == null)  {
-				context.reply("_That bin doesn't exist._");
-				return CommandResult.FAIL;
-			}
+			if (bin == null)
+				return context.replyError("That bin doesn't exist.");
 			
 			context.reply("```" + Utils.escapeMarkdownBlock(bin.getContent()) + "```");
 			return CommandResult.OK;
@@ -261,17 +233,14 @@ public class CommandBin implements Command<BotCommandContext> {
 		try {
 			Guild guild = context.getGuild();
 			long count = StorasBot.getDatabase().getBinsCount(guild);
-			if (count == 0) {
-				context.reply("_The bin is empty._");
-				return CommandResult.OK;
-			}
+			if (count == 0)
+				return context.replyOk("The bin is empty.");
 			
 			int offset = new Random().nextInt((int)count);
 			BinTag bin = StorasBot.getDatabase().getBinOffset(guild, offset);
-			if (bin == null) {
-				context.reply("*You have to `add` bins first.*");
-				return CommandResult.FAIL;
-			}
+			if (bin == null)
+				return context.replyError("You have to `add` bins first.");
+				
 			context.reply(String.format("`%s`\n%s", bin.getTag(), bin.getContent()));
 			return CommandResult.OK;
 		} catch (SQLException e) {

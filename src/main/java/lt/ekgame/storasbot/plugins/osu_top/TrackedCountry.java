@@ -5,11 +5,12 @@ import java.util.List;
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 
 import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.utils.Tracker;
 import lt.ekgame.storasbot.utils.osu.OsuMode;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.TextChannel;
 
-public class TrackedCountry implements ScoreHandler {
+public class TrackedCountry implements ScoreHandler, Tracker {
 	/*
 	 * is country == null then it's global
 	 */
@@ -70,7 +71,7 @@ public class TrackedCountry implements ScoreHandler {
 			int leaderboardRank = country == null ? score.getNewPlayer().getGlobalRank() : score.getNewPlayer().getCountryRank();
 			boolean isCountryTop  = leaderboardRank <= countryTop;
 			boolean isPersonalTop = personalTop == 0 ? false : score.getNewScore().getPersonalTopPlace() <= personalTop;
-			boolean isPerformance = minPerformance == 0 ? false : score.getNewScore().getPerformance() >= minPerformance;
+			boolean isPerformance = minPerformance == 0 ? false : Math.round(score.getNewScore().getPerformance()) >= minPerformance;
 			boolean isNew = (System.currentTimeMillis() - score.getNewScore().getTimestamp()) < 1000*60*60*24;
 			
 			if (isNew && isCountryTop && (isPersonalTop || isPerformance)) {

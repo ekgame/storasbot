@@ -17,8 +17,8 @@ import lt.ekgame.storasbot.plugins.BanchoStatusChecker;
 import lt.ekgame.storasbot.plugins.BeatmapLinkExaminer;
 import lt.ekgame.storasbot.plugins.GameChanger;
 import lt.ekgame.storasbot.plugins.osu_top.OsuTracker;
-import lt.ekgame.storasbot.plugins.osu_top.OsuUserCatche;
 import lt.ekgame.storasbot.utils.osu.OsuApi;
+import lt.ekgame.storasbot.utils.osu.OsuUserCatche;
 import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.JDABuilder;
 import net.dv8tion.jda.entities.Guild;
@@ -28,6 +28,7 @@ import net.dv8tion.jda.entities.User;
 import net.dv8tion.jda.events.ReadyEvent;
 import net.dv8tion.jda.hooks.ListenerAdapter;
 import net.dv8tion.jda.utils.SimpleLog;
+import net.dv8tion.jda.utils.SimpleLog.Level;
 
 public class StorasBot {
 	
@@ -41,6 +42,11 @@ public class StorasBot {
 	
 	public static void main(String... args) throws SQLException, LoginException, IllegalArgumentException {
 		try {
+			if (args.length > 1 && args[1].equalsIgnoreCase("-d"))
+				SimpleLog.LEVEL = Level.DEBUG;
+			else
+				SimpleLog.LEVEL = Level.INFO;
+			
 			config = ConfigFactory.parseFile(new File(args[0])); // Very important that this is first
 			database = new Database(config);
 			database.testConnection();
@@ -83,6 +89,10 @@ public class StorasBot {
 	
 	public static OsuApi getOsuApi() {
 		return osuApi;
+	}
+	
+	public static OsuUserCatche getOsuUserCatche() {
+		return osuUserCatche;
 	}
 	
 	public static CommandListener getCommandHandler() {

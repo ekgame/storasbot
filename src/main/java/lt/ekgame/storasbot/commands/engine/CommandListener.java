@@ -73,12 +73,12 @@ public class CommandListener extends ListenerAdapter {
 			CommandDefinition definition = oCommand.get();
 			
 			if (message.getChannel() instanceof PrivateChannel && !definition.isPrivateCommand()) {
-				theContext.reply("_This command can not be used in private chat._");
+				theContext.replyError("This command can not be used in private chat.");
 				return;
 			}
 			
 			if (message.getChannel() instanceof TextChannel && !definition.isGuildCommand()) {
-				theContext.reply("_This command can only be used in private chat._");
+				theContext.replyError("This command can only be used in private chat.");
 				return;
 			}
 			
@@ -92,7 +92,7 @@ public class CommandListener extends ListenerAdapter {
 				removeFailedCommand(failedCommand);
 		}
 		else {
-			theContext.reply("_I don't know what you want me to do._");
+			theContext.reply(":grey_question: _I don't know what you want me to do._");
 			if (failedCommand == null)
 				addFailedCommand(message, theContext);
 			else

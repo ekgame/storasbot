@@ -23,4 +23,8 @@ public class OsuUser extends OsuApiUser {
 		// a cheat to avoid division by zero for osu! command.
 		return super.getPlayCount() <= 0 ? 1 : super.getPlayCount();
 	}
+
+	public OsuPlayerIdentifier getIdentifier() {
+		return OsuPlayerIdentifier.of(""+getUserId(), OsuMode.fromValue(getMode()));
+	}
 }

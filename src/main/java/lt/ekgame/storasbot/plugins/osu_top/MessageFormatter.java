@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.math3.util.Precision;
 import org.tillerino.osuApiModel.Mods;
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 
@@ -25,12 +26,12 @@ public class MessageFormatter {
 	
 	private static final String BEATMAP_LINK = "https://osu.ppy.sh/b/%d";
 	private static final String format = 
-			  "New score by **{{{player}}}**! • {{mode}} • **#{{global_rank}}** • `{{country}}`#{{country_rank}}\n"
-            + "_{{{artist}}} - {{{title}}} [{{{version}}}]_\n"
-            + "(OD: **{{od}}**, CS: **{{cs}}**, HP: **{{hp}}**, AR: **{{ar}}**)\n"
-            + "(Length: **{{length}}**, BPM: **{{bpm}}**, SD: **{{stars}}**)\n"
-            + "<{{beatmap_link}}>\n"
-            + "x{{combo}}/{{max_combo}} • {{rank}} • {{score}} • {{accuracy}}% • {{mods}} • **{{performance}}pp** • #{{personal_top}} personal best";
+			  "__New score by **{{{player}}}**! • **{{performance_new}}** • #{{personal_top}} personal best__\n"
+			+ "⬥ {{mode}} • #{{global_rank}} • {{country}}#{{country_rank}} • {{performance}}\n"
+			+ "⬥ {{combo}} • {{rank}} • {{score}} • {{accuracy}} • {{mods}}\n"
+            + "{{{artist}}} - {{{title}}} [{{{version}}}]\n"
+            + "⬥ {{length}} • {{bpm}} BPM • ★ **{{stars}}** • <{{beatmap_link}}>";
+            
 	private static final Mustache scoreFormat;
 	private static final DecimalFormat decimalFormat;
 	
@@ -45,15 +46,18 @@ public class MessageFormatter {
 	}
 	
 	public String format(Guild guild, OsuScoreUpdate scoreUpdate, OsuApiBeatmap beatmap) {
+		OsuPlayer oldPlayer = scoreUpdate.getOldPlayer();
 		OsuPlayer player = scoreUpdate.getNewPlayer();
+		OsuScore oldScore = scoreUpdate.getOldScore();
 		OsuScore score = scoreUpdate.getNewScore();
 		
 		Map<String, String> scope = new HashMap<>();
 		scope.put("player", Utils.escapeMarkdown(player.getUsername()));
 		scope.put("mode", player.getGamemode().getName());
-		scope.put("global_rank", String.valueOf(player.getGlobalRank()));
+		scope.put("global_rank", player.getGlobalRank() + getDiff(oldPlayer.getGlobalRank(), player.getGlobalRank(), true));
 		scope.put("country", player.getCountry().toUpperCase());
-		scope.put("country_rank", String.valueOf(player.getCountryRank()));
+		scope.put("country_rank", player.getCountryRank() + getDiff(oldPlayer.getCountryRank(), player.getCountryRank(), true));
+		scope.put("performance", decimalFormat.format(player.getPerformance())+"pp" + getDiff(oldPlayer.getPerformance(), player.getPerformance(), false));
 		
 		scope.put("artist", Utils.escapeMarkdown(beatmap.getArtist()));
 		scope.put("title", Utils.escapeMarkdown(beatmap.getTitle()));
@@ -67,13 +71,15 @@ public class MessageFormatter {
 		scope.put("stars", decimalFormat.format(beatmap.getStarDifficulty()));
 		scope.put("beatmap_link", String.format(BEATMAP_LINK, beatmap.getBeatmapId()));
 		scope.put("max_combo", String.valueOf(beatmap.getMaxCombo()));
+		scope.put("combo", "x" + (beatmap.getMaxCombo() == score.getMaxCombo() ? String.valueOf(score.getMaxCombo()) : score.getMaxCombo() + "/" + beatmap.getMaxCombo()));
 		
-		scope.put("combo", String.valueOf(score.getMaxCombo()));
 		scope.put("rank", getRankString(score));
 		scope.put("score", decimalFormat.format(score.getScore()));
-		scope.put("accuracy", decimalFormat.format(score.getAccuracy()));
+		double accuracyOld = oldScore == null ? score.getAccuracy() : oldScore.getAccuracy();
+		scope.put("accuracy", decimalFormat.format(score.getAccuracy()) + "%" + getDiff(accuracyOld, score.getAccuracy(), false));
 		scope.put("mods", getModsString(score.getMods()));
-		scope.put("performance", decimalFormat.format(score.getPerformance()));
+		double performaceOld = oldScore == null ? score.getPerformance() : oldScore.getPerformance();
+		scope.put("performance_new", decimalFormat.format(score.getPerformance()) + "pp" + getDiff(performaceOld, score.getPerformance(), false));
 		scope.put("personal_top", decimalFormat.format(score.getPersonalTopPlace()));
 		
 		StringWriter writer = new StringWriter();
@@ -82,10 +88,16 @@ public class MessageFormatter {
 		return writer.toString();
 	}
 	
+	private String getDiff(double oldVal, double newVal, boolean invert) {
+		double diff = (newVal - oldVal) * (invert ? -1 : 1);
+		if (Precision.equals(newVal - oldVal, 0, 0.001)) return "";
+		return " (" + (diff>0?"+":"") + decimalFormat.format(diff) + ")";
+	}
+	
 	private String getRankString(OsuScore score) {
 		String rank = score.getRank().replace("X", "SS");
 		if (score.getCountMiss() > 0)
-			rank += " **CHOKE**";
+			rank += " CHOKE";
 		return rank;
 	}
 	

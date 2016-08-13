@@ -2,9 +2,15 @@ package lt.ekgame.storasbot.plugins.osu_top;
 
 import java.util.List;
 
-import lt.ekgame.storasbot.utils.osu.OsuPlayerIdentifier;
+import org.tillerino.osuApiModel.OsuApiBeatmap;
 
-public class TrackedPlayer implements ScoreHandler {
+import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.utils.Tracker;
+import lt.ekgame.storasbot.utils.osu.OsuPlayerIdentifier;
+import net.dv8tion.jda.entities.Guild;
+import net.dv8tion.jda.entities.TextChannel;
+
+public class TrackedPlayer implements ScoreHandler, Tracker {
 
 	private String guildId, channelId;
 	private int personalTop, minPP;
@@ -16,6 +22,10 @@ public class TrackedPlayer implements ScoreHandler {
 		this.identifier = identifier;
 		this.personalTop = personalTop;
 		this.minPP = minPP;
+	}
+
+	public TrackedPlayer(Guild guild, TextChannel channel, OsuPlayerIdentifier identifier, int personalTop, int minPP) {
+		this(guild.getId(), channel.getId(), identifier, personalTop, minPP);
 	}
 
 	public String getGuildId() {
@@ -40,6 +50,23 @@ public class TrackedPlayer implements ScoreHandler {
 
 	@Override
 	public void handleScoreUpdates(List<OsuScoreUpdate> scores) {
-		// TODO Auto-generated method stub
+		for (OsuScoreUpdate score : scores) {
+			boolean isPersonalTop = personalTop == 0 ? false : score.getNewScore().getPersonalTopPlace() <= personalTop;
+			boolean isPerformance = minPP == 0 ? false : Math.round(score.getNewScore().getPerformance()) >= minPP;
+			boolean isNew = (System.currentTimeMillis() - score.getNewScore().getTimestamp()) < 1000*60*60*24;
+			
+			if (isNew && (isPersonalTop || isPerformance)) {
+				Guild guild = StorasBot.getJDA().getGuildById(guildId);
+				TextChannel channel = StorasBot.getJDA().getTextChannelById(channelId);
+				if (guild == null || channel == null) {
+					// TODO remove tracker from db
+					break;
+				}
+				OsuApiBeatmap beatmap = score.getBeamap();
+				if (beatmap == null) continue;
+				String message = OsuTracker.messageFormatter.format(guild, score, beatmap);
+				StorasBot.sendMessage(channel, message);
+			}
+		}
 	}
 }

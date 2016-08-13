@@ -102,6 +102,36 @@ public class Database {
 		}
 	}
 	
+	public List<TrackedCountry> getTrackedCountries(Guild guild) throws SQLException {
+		try (Handle handle = dbi.open()) {
+			List<Map<String, Object>> rawData = handle.select("SELECT guild_id, channel_id, country, gamemode, top_number, top_personal, min_pp FROM osu_country_tracker WHERE guild_id=?", guild.getId());
+			return rawData.stream()
+				.map((row)->new TrackedCountry(
+					(String) row.get("guild_id"), 
+					(String) row.get("channel_id"), 
+					(String) row.get("country"), 
+					OsuMode.fromValue((int) row.get("gamemode")), 
+					(int) row.get("top_number"), 
+					(int) row.get("top_personal"), 
+					(int) row.get("min_pp")
+				)).collect(Collectors.toList());
+		}
+	}
+	
+	public List<TrackedPlayer> getTrackedPlayers(Guild guild) throws SQLException {
+		try (Handle handle = dbi.open()) {
+			List<Map<String, Object>> rawData = handle.select("SELECT guild_id, channel_id, user_id, gamemode, top_number, min_pp FROM osu_user_tracker WHERE guild_id=?", guild.getId());
+			return rawData.stream()
+				.map((row)->new TrackedPlayer(
+					(String) row.get("guild_id"), 
+					(String) row.get("channel_id"), 
+					OsuPlayerIdentifier.of((String) row.get("user_id"), OsuMode.fromValue((int) row.get("gamemode"))),
+					(int)    row.get("top_number"),
+					(int)    row.get("min_pp")
+				)).collect(Collectors.toList());
+		}
+	}
+	
 	public OsuPlayer getTrackedUser(OsuPlayerIdentifier identifier) {
 		try (Handle handle = dbi.open()) {
 			List<Map<String, Object>> rawData = handle.select("SELECT user_id, username, country, performance, global_rank, country_rank, accuracy FROM osu_tracked_users WHERE user_id=? AND gamemode=?", identifier.getUserId(), identifier.getModeValue());
@@ -196,9 +226,9 @@ public class Database {
 					.bind(6, score.getScore())
 					.bind(7, score.getMaxCombo())
 					.bind(8, score.getTimestamp())
-					.bind(9, identifier.getUserId())
-					.bind(10, score.getRank())
-					.bind(11, score.getPersonalTopPlace())
+					.bind(9, score.getRank())
+					.bind(10, score.getPersonalTopPlace())
+					.bind(11, identifier.getUserId())
 					.bind(12, score.getBeatmapId())
 					.bind(13, identifier.getModeValue());
 			}
@@ -284,6 +314,19 @@ public class Database {
 			
 			if (rawData.size() != 0) {
 				handle.update("DELETE FROM osu_country_tracker WHERE id=?", (int) rawData.get(0).get("id"));
+				return true;
+			}
+			else return false;
+		}
+	}
+	
+	public boolean removeTrackedplayer(Guild guild, TextChannel channel, String userId, OsuMode mode) {
+		try (Handle handle = dbi.open()) {
+			List<Map<String, Object>> rawData =  handle.select("SELECT id FROM osu_user_tracker WHERE guild_id=? AND channel_id=? AND user_id=? AND gamemode=?", 
+					guild.getId(), channel.getId(), userId, mode.getValue());
+			
+			if (rawData.size() != 0) {
+				handle.update("DELETE FROM osu_user_tracker WHERE id=?", (int) rawData.get(0).get("id"));
 				return true;
 			}
 			else return false;

@@ -62,7 +62,12 @@ public class BotCommandContext {
 	}
 	
 	public CommandResult replyError(String message) {
-		reply("_" + message + "_");
+		reply(":no_entry_sign: _" + message + "_");
+		return CommandResult.FAIL;
+	}
+	
+	public CommandResult replyOk(String message) {
+		reply(":white_check_mark:  " + message);
 		return CommandResult.FAIL;
 	}
 }

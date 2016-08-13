@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import lt.ekgame.storasbot.StorasBot;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
 import lt.ekgame.storasbot.commands.engine.CommandFlags;
@@ -36,6 +37,9 @@ public class CommandPrune implements Command<BotCommandContext> {
 		TextChannel channel = context.getTextChannel();
 		User sender = context.getSender();
 		
+		if (!Utils.hasCommandPermission(channel, StorasBot.getJDA().getSelfInfo(), Permission.MESSAGE_MANAGE))
+			return context.replyError("I don't have permissions to delete messages.");
+		
 		if (Utils.hasCommandPermission(channel, sender, Permission.MESSAGE_MANAGE)) {
 			Optional<Integer> oNumber = command.getInteger();
 			Optional<String> oUserRaw = command.getEverything();
@@ -57,8 +61,7 @@ public class CommandPrune implements Command<BotCommandContext> {
 								remove.add(message);
 						}
 						channel.deleteMessages(remove);
-						context.reply("Deleted **" + number + "** messages by " + user.get().getAsMention() + ".");
-						return CommandResult.OK;
+						return context.replyOk("Deleted **" + number + "** messages by " + user.get().getAsMention() + ".");
 					}
 					else {
 						return context.replyError("Unknown user **" + Utils.escapeMarkdown(oUserRaw.get()) + "**.");
@@ -71,8 +74,7 @@ public class CommandPrune implements Command<BotCommandContext> {
 						remove.add(message);
 					}
 					channel.deleteMessages(remove);
-					context.reply("_Deleted **" + number + "** messages._");
-					return CommandResult.OK;
+					return context.replyOk("Deleted **" + number + "** messages.");
 				}
 			}
 			else {

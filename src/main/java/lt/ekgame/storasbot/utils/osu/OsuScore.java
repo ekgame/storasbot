@@ -1,5 +1,6 @@
 package lt.ekgame.storasbot.utils.osu;
 
+import org.apache.commons.math3.util.Precision;
 import org.tillerino.osuApiModel.OsuApiScore;
 
 public class OsuScore {
@@ -68,7 +69,7 @@ public class OsuScore {
 			boolean different = false;
 			different |= !this.beatmapId.equals(other.beatmapId);
 			different |= this.mods != other.mods;
-			different |= Math.abs(this.performance - other.getPerformance()) > 0.0001;
+			different |= !Precision.equals(this.performance, other.getPerformance(), 0.0001);
 			return !different;
 		}
 		return false;

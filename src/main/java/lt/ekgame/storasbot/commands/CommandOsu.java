@@ -77,7 +77,7 @@ public class CommandOsu implements Command<BotCommandContext> {
 			
 			for (String username : usernames) {
 				try {
-					OsuUser user = StorasBot.getOsuApi().getUser(username, mode);
+					OsuUser user = StorasBot.getOsuApi().getUserByUsername(username, mode);
 					if (user != null) 
 						users.add(user);
 					else

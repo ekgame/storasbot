@@ -17,6 +17,7 @@ import lt.ekgame.storasbot.StorasBot;
 import lt.ekgame.storasbot.utils.osu.OsuPlayer;
 import lt.ekgame.storasbot.utils.osu.OsuPlayerIdentifier;
 import lt.ekgame.storasbot.utils.osu.OsuScore;
+import lt.ekgame.storasbot.utils.osu.OsuUserCatche;
 import lt.ekgame.storasbot.utils.osu.OsuUtils;
 import net.dv8tion.jda.utils.SimpleLog;
 
@@ -32,8 +33,8 @@ public class OsuUserUpdater {
 		this.catche = catche;
 	}
 	
-	public void submit(OsuUpdatablePlayer updatable) {
-		workers.submit(new Worker(updatable));
+	public void submit(OsuUpdatablePlayer updatable, boolean sendNotifications) {
+		workers.submit(new Worker(updatable, sendNotifications));
 	}
 	
 	public void awaitTermination() throws InterruptedException {
@@ -45,10 +46,12 @@ public class OsuUserUpdater {
 		
 		private OsuUpdatablePlayer updatable;
 		private OsuPlayerIdentifier identifier;
+		private boolean sendNotifications;
 		
-		public Worker(OsuUpdatablePlayer updatable) {
+		public Worker(OsuUpdatablePlayer updatable, boolean sendNotifications) {
 			this.updatable = updatable;
 			this.identifier = updatable.getIdentifier();
+			this.sendNotifications = sendNotifications;
 		}
 
 		@Override
@@ -60,12 +63,12 @@ public class OsuUserUpdater {
 				if (catched == null)
 					updateNewPlayer(new OsuPlayer(identifier));
 				else if (countryPlayer == null)
-					updateIndividual(catched, new OsuPlayer(identifier), updatable);
+					updateIndividual(catched, updatable);
 				else 
 					updateFromCountry(catched, countryPlayer, updatable);
 				
 			} catch (IOException | SQLException e) {
-				e.printStackTrace();
+				LOG.info(e.getClass().getName() + ": " + e.getMessage());
 			}
 		}
 		
@@ -80,27 +83,32 @@ public class OsuUserUpdater {
 			
 			if (differentPP || differentAcc) {
 				OsuPlayer updated = known.getFromAPI();
-				LOG.info(updated.getUsername() + ": checking scores " + differentAcc + " " + differentPP + " " + catchedAcc + " " + currentAcc);
+				LOG.info(updated.getUsername() + ": (cou) checking scores " + differentAcc + " " + differentPP + " " + catchedAcc + " " + currentAcc);
 				List<OsuScoreUpdate> scores = updateScores(catched, updated);
-				updatable.handleScoreUpdates(scores);
+				
+				if (sendNotifications)
+					updatable.handleScoreUpdates(scores);
 			}
 		}
 
-		private void updateIndividual(OsuPlayer catched, OsuPlayer known, OsuUpdatablePlayer updatable) throws IOException, NumberFormatException, SQLException {
-			OsuPlayer updated = known.getFromAPI();
+		private void updateIndividual(OsuPlayer catched, OsuUpdatablePlayer updatable) throws IOException, NumberFormatException, SQLException {
+			OsuPlayer updated = catched.getFromAPI();
+			LOG.debug(updated.getUsername() + ": (ind) quick check");
 			
 			double catchedPP = catched.getPerformance();
-			double knownPP = known.getPerformance();
+			double knownPP = updated.getPerformance();
 			boolean differentPP = !Precision.equals(catchedPP, knownPP, 0.0001);
 			
 			double catchedAcc = catched.getAccuracy();
-			double currentAcc = known.getAccuracy();
+			double currentAcc = updated.getAccuracy();
 			boolean differentAcc = !Precision.equals(catchedAcc, currentAcc, 0.0001);
 			
 			if (differentPP || differentAcc) {
-				LOG.info(updated.getUsername() + ": checking scores " + differentAcc + " " + differentPP + " " + catchedAcc + " " + currentAcc);
+				LOG.info(updated.getUsername() + ": (ind) checking scores " + differentAcc + " " + differentPP + " " + catchedAcc + " " + currentAcc);
 				List<OsuScoreUpdate> scores = updateScores(catched, updated);
-				updatable.handleScoreUpdates(scores);
+				
+				if (sendNotifications)
+					updatable.handleScoreUpdates(scores);
 			}
 		}
 		
