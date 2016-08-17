@@ -16,7 +16,6 @@ import lt.ekgame.storasbot.plugins.AntiShitImageHosts;
 import lt.ekgame.storasbot.plugins.BanchoStatusChecker;
 import lt.ekgame.storasbot.plugins.BeatmapLinkExaminer;
 import lt.ekgame.storasbot.plugins.GameChanger;
-import lt.ekgame.storasbot.plugins.osu_top.OsuTracker;
 import lt.ekgame.storasbot.utils.osu.OsuApi;
 import lt.ekgame.storasbot.utils.osu.OsuUserCatche;
 import net.dv8tion.jda.JDA;
@@ -60,9 +59,10 @@ public class StorasBot {
 			client.addEventListener(new ListenerAdapter() {
 				@Override
 				public void onReady(ReadyEvent event) {
-					new OsuTracker(osuUserCatche).start();
+					//new OsuTracker(osuUserCatche).start();
 				}
 			});
+			
 			
 			client.addEventListener(commandHandler = new CommandListener());
 			client.addEventListener(new BeatmapLinkExaminer());

@@ -320,7 +320,7 @@ public class Database {
 		}
 	}
 	
-	public boolean removeTrackedplayer(Guild guild, TextChannel channel, String userId, OsuMode mode) {
+	public boolean removeTrackedPlayer(Guild guild, TextChannel channel, String userId, OsuMode mode) {
 		try (Handle handle = dbi.open()) {
 			List<Map<String, Object>> rawData =  handle.select("SELECT id FROM osu_user_tracker WHERE guild_id=? AND channel_id=? AND user_id=? AND gamemode=?", 
 					guild.getId(), channel.getId(), userId, mode.getValue());

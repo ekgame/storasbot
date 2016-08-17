@@ -34,6 +34,13 @@ import net.dv8tion.jda.utils.PermissionUtil;
 
 public class Utils {
 	
+	public static String trimLength(String text, int maxLength, String denoter) {
+		if (text.length() <= maxLength)
+			return text;
+		else 
+			return text.substring(0, maxLength - denoter.length()) + denoter;
+	}
+	
 	public static String escapeMarkdown(String text) {
 		return text.replace("*", "\\*").replace("`", "\u200B`\u200B").replace("&#39;", "'");
 	}

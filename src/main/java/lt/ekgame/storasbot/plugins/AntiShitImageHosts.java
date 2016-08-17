@@ -18,7 +18,7 @@ public class AntiShitImageHosts extends ListenerAdapter {
 	private static List<String> exceptions = Arrays.asList("image.prntscr.com", "i.gyazo.com");
 	private static List<String> extensions = Arrays.asList("png", "jpg", "jpeg", "bmp", "gif", "mp4", "mpg", "mpeg", "mp3");
 	
-	private static String REPLY = "Please use <https://getsharex.com/> or direct links.";
+	private static String REPLY = "Please use direct links or <https://getsharex.com/>.";
 	
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {

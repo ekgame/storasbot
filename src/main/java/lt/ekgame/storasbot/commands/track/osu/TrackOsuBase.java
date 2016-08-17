@@ -211,10 +211,10 @@ public class TrackOsuBase {
 				if (user == null) 
 					return context.replyError("That's not a player I know of.");
 				
-				if (StorasBot.getDatabase().removeTrackedCountry(guild, channel, ""+user.getUserId(), mode)) {
+				if (StorasBot.getDatabase().removeTrackedPlayer(guild, channel, ""+user.getUserId(), mode)) {
 					return context.replyOk("No longer tracking **" + user.getUserName() + "** " + mode.getName() + ".");
 				}
-				else return context.replyError("I'm not even tracking the " + mode.getName() + " global leaderboard.");
+				else return context.replyError("I'm not even tracking **" + user.getUserName() + "**.");
 				
 			} catch (IOException e) {
 				e.printStackTrace();

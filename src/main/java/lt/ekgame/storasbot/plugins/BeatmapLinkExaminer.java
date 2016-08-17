@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 
 import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.utils.TableRenderer;
 import lt.ekgame.storasbot.utils.Utils;
 import lt.ekgame.storasbot.utils.osu.OsuBeatmapCatche;
 import net.dv8tion.jda.entities.TextChannel;
@@ -26,8 +28,7 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 
 	private DecimalFormat diffFormat;
 	
-	private String TITLE = "_%s - %s_ | mapset by %s";
-	private String VERSION = "\n[%s] (OD: **%s**, CS: **%s**, HP: **%s**, AR: **%s**, BPM: **%s**, SD: **%s**)";
+	private String TITLE = "___%s - %s___ (mapset by **%s**)";
 	
 	public BeatmapLinkExaminer() {
 		DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.UK);
@@ -54,7 +55,7 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 				try {
 					String temp = generateMessage(map);
 					if (!message.isEmpty())
-						message += "\n\n";
+						message += "\n";
 					message += temp;
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -66,36 +67,52 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 	}
 	
 	String generateMessage(MatchResult map) throws IOException {
+		TableRenderer table = new TableRenderer();
+		table.setHeader("Version", "Stars", "Combo", "BPM", "OD", "CS", "HP", "AR");
+		String title = null;
+		String addition = "";
 		if (map.single) {
 			OsuApiBeatmap beatmap = OsuBeatmapCatche.getBeatmap(map.id);
 			if (beatmap == null) return null;
-			return generateTitle(beatmap) + generateVersion(beatmap);
+			title = generateTitle(beatmap);
+			generateVersion(table, beatmap);
 		}
 		else {
 			List<OsuApiBeatmap> beatmaps = StorasBot.getOsuApi().getBeatmapSet(map.id);
 			if (beatmaps == null) return null;
 			
-			beatmaps.sort((a, b) -> ((int)a.getStarDifficulty()*100 - (int)b.getStarDifficulty()*100));
-			String result = generateTitle(beatmaps.get(0));
-			for (OsuApiBeatmap beatmap : beatmaps)
-				result += generateVersion(beatmap);
-			return result;
+			List<OsuApiBeatmap> beatmapsSorted = beatmaps.stream()
+				.sorted((a, b) -> ((int)b.getStarDifficulty()*100 - (int)a.getStarDifficulty()*100))
+				.limit(10)
+				.collect(Collectors.toList());
+			
+			title = generateTitle(beatmaps.get(0));
+			
+			for (OsuApiBeatmap beatmap : beatmapsSorted)
+				generateVersion(table, beatmap);
+			
+			if (beatmapsSorted.size() < beatmaps.size())
+				addition = "\nAnd " + (beatmaps.size() - beatmapsSorted.size()) + " more maps.";
 		}
+		return title + "```" + table.build() + addition + "```";
 	}
 	
 	String generateTitle(OsuApiBeatmap beatmap) {
 		return String.format(TITLE, Utils.escapeMarkdown(beatmap.getArtist()), 
-				Utils.escapeMarkdown(beatmap.getTitle()), Utils.escapeMarkdown(beatmap.getCreator()));
+			Utils.escapeMarkdown(beatmap.getTitle()), Utils.escapeMarkdown(beatmap.getCreator()));
 	}
 	
-	String generateVersion(OsuApiBeatmap beatmap) {
-		return String.format(VERSION, Utils.escapeMarkdown(beatmap.getVersion()), 
-				diffFormat.format(beatmap.getOverallDifficulty()),
-				diffFormat.format(beatmap.getCircleSize()),
-				diffFormat.format(beatmap.getHealthDrain()),
-				diffFormat.format(beatmap.getApproachRate()),
-				diffFormat.format(beatmap.getBpm()),
-				diffFormat.format(beatmap.getStarDifficulty()));
+	void generateVersion(TableRenderer table, OsuApiBeatmap beatmap) {
+		table.addRow(
+			Utils.escapeMarkdown(Utils.trimLength(beatmap.getVersion(), 20, "...")), 
+			diffFormat.format(beatmap.getStarDifficulty()),
+			diffFormat.format(beatmap.getMaxCombo()),
+			diffFormat.format(beatmap.getBpm()),
+			diffFormat.format(beatmap.getOverallDifficulty()),
+			diffFormat.format(beatmap.getCircleSize()),
+			diffFormat.format(beatmap.getHealthDrain()),
+			diffFormat.format(beatmap.getApproachRate())
+		);
 	}
 	
 	private List<MatchResult> matchBeatmaps(String content, Pattern pattern, int group, boolean single) {
@@ -118,7 +135,7 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 		public boolean equals(Object obj) {
 			if (obj instanceof MatchResult) {
 				MatchResult other = (MatchResult) obj;
-				return other.single == single && other.id == id;
+				return other.single == single && other.id.equals(id);
 			}
 			return false;
 		}

@@ -72,7 +72,7 @@ public class TrackedCountry implements ScoreHandler, Tracker {
 			boolean isCountryTop  = leaderboardRank <= countryTop;
 			boolean isPersonalTop = personalTop == 0 ? false : score.getNewScore().getPersonalTopPlace() <= personalTop;
 			boolean isPerformance = minPerformance == 0 ? false : Math.round(score.getNewScore().getPerformance()) >= minPerformance;
-			boolean isNew = (System.currentTimeMillis() - score.getNewScore().getTimestamp()) < 1000*60*60*24;
+			boolean isNew = (System.currentTimeMillis() - score.getNewScore().getTimestamp()) < 1000*60*10;
 			
 			if (isNew && isCountryTop && (isPersonalTop || isPerformance)) {
 				Guild guild = StorasBot.getJDA().getGuildById(guildId);
