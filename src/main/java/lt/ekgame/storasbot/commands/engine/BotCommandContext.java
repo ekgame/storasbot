@@ -1,7 +1,7 @@
 package lt.ekgame.storasbot.commands.engine;
 
 import lt.ekgame.storasbot.StorasBot;
-
+import lt.ekgame.storasbot.plugins.Settings;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.MessageChannel;
@@ -49,6 +49,10 @@ public class BotCommandContext {
 
 	public Guild getGuild() {
 		return guild;
+	}
+	
+	public Settings getSettings() {
+		return StorasBot.getSettings(getGuild());
 	}
 	
 	public void reply(String message) {

@@ -13,6 +13,7 @@ import org.skife.jdbi.v2.PreparedBatch;
 
 import com.typesafe.config.Config;
 
+import lt.ekgame.storasbot.plugins.Setting;
 import lt.ekgame.storasbot.plugins.osu_top.TrackedCountry;
 import lt.ekgame.storasbot.plugins.osu_top.TrackedPlayer;
 import lt.ekgame.storasbot.utils.BinTag;
@@ -42,6 +43,24 @@ public class Database {
 	
 	public void testConnection() {
 		dbi.open();
+	}
+	
+	// --------- settings --------- //
+	
+	public List<Map<String, Object>> getSettings(Guild guild) {
+		try (Handle handle = dbi.open()) {
+			return handle.select("SELECT setting, value FROM guild_settings");
+		}
+	}
+	
+	public void updateSetting(Guild guild, Setting setting, Object value) {
+		try (Handle handle = dbi.open()) {
+			List<Map<String, Object>> result = handle.select("SELECT id FROM guild_settings WHERE guild_id=? AND setting=?", guild.getId(), setting.getSQLName());
+			if (result.size() == 0)
+				handle.insert("INSERT INTO guild_settings (guild_id, setting, value) VALUES (?, ?, ?)", guild.getId(), setting.getSQLName(), value);
+			else
+				handle.update("UPDATE guild_settings SET value=? WHERE setting=?", value, setting.getSQLName());
+		}
 	}
 	
 	// --------- osu! ranking tracker --------- //

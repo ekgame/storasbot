@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -133,10 +134,17 @@ public class BanchoStatusChecker extends Thread implements EventListener {
 	
 	private List<TextChannel> getChannels() {
 		List<TextChannel> channels = new ArrayList<>();
-		for (Guild guild : StorasBot.getJDA().getGuilds())
-			for (TextChannel channel : guild.getTextChannels())
-				if (channel.getName().equals(postChannel))
+		for (Guild guild : StorasBot.getJDA().getGuilds()) {
+			Settings settings = StorasBot.getSettings(guild);
+			if (settings.get(Setting.BANCHO_STATUS, Boolean.class)) {
+				String channelId = settings.get(Setting.BANCHO_STATUS_CHANNEL, String.class);
+				TextChannel channel = StorasBot.getJDA().getTextChannelById(channelId);
+				if (channel != null)
 					channels.add(channel);
+			}
+		}
+		LOG.debug("Got channels: " + channels.size() + " - " + channels.stream().map(o->o.getName()).collect(Collectors.joining(", ")));
+		
 		return channels;
 	}
 	

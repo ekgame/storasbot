@@ -43,6 +43,10 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 		if (event.getAuthor().equals(StorasBot.getJDA().getSelfInfo()))
 			return; // ignore own messages
 		
+		Boolean enabled = StorasBot.getSettings(event.getGuild()).get(Setting.BEATMAP_EXAMINER, Boolean.class);
+		if (!enabled)
+			return; // don't process if disabled
+		
 		String content = event.getMessage().getContent();
 		List<MatchResult> maps = new LinkedList<>();
 		Utils.addAllUniques(maps, matchBeatmaps(content, matcherSingle, 3, true));

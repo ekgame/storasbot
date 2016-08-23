@@ -25,6 +25,10 @@ public class AntiShitImageHosts extends ListenerAdapter {
 		if (event.getAuthor().equals(StorasBot.getJDA().getSelfInfo()))
 			return; // ignore own messages
 		
+		Boolean enabled = StorasBot.getSettings(event.getGuild()).get(Setting.ASIH, Boolean.class);
+		if (!enabled)
+			return; // don't process if disabled
+		
 		String content = event.getMessage().getContent();
 		Matcher matcher = HTTP_URL.matcher(content);
 		while (matcher.find()) {

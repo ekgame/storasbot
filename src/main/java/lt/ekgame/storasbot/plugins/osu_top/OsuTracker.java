@@ -14,9 +14,12 @@ import lt.ekgame.storasbot.utils.osu.OsuMode;
 import lt.ekgame.storasbot.utils.osu.OsuPlayer;
 import lt.ekgame.storasbot.utils.osu.OsuPlayerIdentifier;
 import lt.ekgame.storasbot.utils.osu.OsuUserCatche;
+import net.dv8tion.jda.events.Event;
+import net.dv8tion.jda.events.ReadyEvent;
+import net.dv8tion.jda.hooks.EventListener;
 import net.dv8tion.jda.utils.SimpleLog;
 
-public class OsuTracker extends Thread {
+public class OsuTracker extends Thread implements EventListener {
 	
 	public static final SimpleLog LOG = SimpleLog.getLog("Osu Tracker");
 	public static final int TOP_OVERTAKE = 10;
@@ -26,6 +29,13 @@ public class OsuTracker extends Thread {
 	
 	public OsuTracker(OsuUserCatche osuUserCatche) {
 		this.userCatche = osuUserCatche;
+	}
+	
+	@Override
+	public void onEvent(Event event) {
+		if (event instanceof ReadyEvent) {
+			start();
+		}
 	}
 
 	public void run() {

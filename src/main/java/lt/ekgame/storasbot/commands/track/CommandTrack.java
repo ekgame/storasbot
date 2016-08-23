@@ -23,7 +23,10 @@ public class CommandTrack implements Command<BotCommandContext>  {
 	
 	@Override
 	public String getHelp(CommandFlags flags) {
-		return "TODO";
+		return "Usage:\n"
+			 + "$tracking\n"
+			 + "\n"
+			 + "Shows information about what's being tracked in this channel.";
 	}
 
 	@Override

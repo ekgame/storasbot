@@ -16,6 +16,9 @@ import lt.ekgame.storasbot.plugins.AntiShitImageHosts;
 import lt.ekgame.storasbot.plugins.BanchoStatusChecker;
 import lt.ekgame.storasbot.plugins.BeatmapLinkExaminer;
 import lt.ekgame.storasbot.plugins.GameChanger;
+import lt.ekgame.storasbot.plugins.GuildSettings;
+import lt.ekgame.storasbot.plugins.Settings;
+import lt.ekgame.storasbot.plugins.osu_top.OsuTracker;
 import lt.ekgame.storasbot.utils.osu.OsuApi;
 import lt.ekgame.storasbot.utils.osu.OsuUserCatche;
 import net.dv8tion.jda.JDA;
@@ -37,6 +40,7 @@ public class StorasBot {
 	private static OsuApi osuApi;
 	private static OsuUserCatche osuUserCatche;
 	private static CommandListener commandHandler;
+	private static GuildSettings guildSettings;
 	private static List<String> operators = new ArrayList<>();
 	
 	public static void main(String... args) throws SQLException, LoginException, IllegalArgumentException {
@@ -51,24 +55,19 @@ public class StorasBot {
 			database.testConnection();
 			osuApi = new OsuApi(config);
 			osuUserCatche = new OsuUserCatche();
+			guildSettings = new GuildSettings(database);
 			
 			String token = config.getString("api.discord");
 			operators = config.getStringList("general.operators");
-			client = new JDABuilder().setBotToken(token).buildAsync();
+			client = new JDABuilder().setBotToken(token)
+				//.addListener(new OsuTracker(osuUserCatche))
+				.addListener(commandHandler = new CommandListener())
+				.addListener(new BeatmapLinkExaminer())
+				.addListener(new AntiShitImageHosts())
+				.addListener(new BanchoStatusChecker(config))
+				.addListener(new GameChanger(config))
+				.buildAsync();
 			
-			client.addEventListener(new ListenerAdapter() {
-				@Override
-				public void onReady(ReadyEvent event) {
-					//new OsuTracker(osuUserCatche).start();
-				}
-			});
-			
-			
-			client.addEventListener(commandHandler = new CommandListener());
-			client.addEventListener(new BeatmapLinkExaminer());
-			client.addEventListener(new AntiShitImageHosts());
-			client.addEventListener(new BanchoStatusChecker(config));
-			client.addEventListener(new GameChanger(config));
 		} catch (Exception e) {
 			SimpleLog.getLog("Initialization").fatal("Initialization failed.");
 			e.printStackTrace();
@@ -97,6 +96,10 @@ public class StorasBot {
 	
 	public static CommandListener getCommandHandler() {
 		return commandHandler;
+	}
+	
+	public static Settings getSettings(Guild guild) {
+		return guildSettings.getSettings(guild);
 	}
 	
 	public static boolean isOperator(User user) {
