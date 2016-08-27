@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import lt.ekgame.storasbot.commands.engine.CommandFlags;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
+import lt.ekgame.storasbot.commands.engine.DuplicateFlagException;
 
 public class CommandIteratorTest {
 
@@ -61,7 +62,7 @@ public class CommandIteratorTest {
 	}
 	
 	@Test
-	public void test6() {
+	public void test6() throws DuplicateFlagException {
 		String command = "test -g:789 -h:\"aasd asdasd asdd\" -j -p:test";
 		CommandIterator iterator = new CommandIterator(command);
 		assertEquals("test", iterator.getToken().get());

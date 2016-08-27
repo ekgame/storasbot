@@ -2,19 +2,19 @@ package lt.ekgame.storasbot.commands.settings;
 
 import java.util.Optional;
 
-import lt.ekgame.storasbot.StorasBot;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
 import lt.ekgame.storasbot.commands.engine.CommandFlags;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
+import lt.ekgame.storasbot.commands.engine.DuplicateFlagException;
 import lt.ekgame.storasbot.utils.Utils;
 import net.dv8tion.jda.Permission;
 
 public abstract class CommandTogglableSetting implements Command<BotCommandContext> {
 
 	@Override
-	public CommandResult execute(CommandIterator command, BotCommandContext context) {
+	public CommandResult execute(CommandIterator command, BotCommandContext context) throws DuplicateFlagException {
 		if (!Utils.hasCommandPermission(context.getGuild(), context.getSender(), Permission.MANAGE_SERVER))
 			return context.replyError("You don't have the \"Manage server\" permission.");
 		

@@ -81,8 +81,11 @@ public class OsuLeaderboardScraper {
 					if (remaining <= 0)
 						break;
 				}
+				Thread.sleep(1000);
 			} catch (SocketTimeoutException e) {
 				LOG.debug("Timed out while scraping " + updatable.getCountry());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 			
 			return result;
@@ -96,7 +99,7 @@ public class OsuLeaderboardScraper {
 			else
 				url = String.format(RANK_LISTING, updatable.getCountry(), updatable.getMode().getValue(), page);
 					
-			Document doc = Jsoup.connect(url).get();
+			Document doc = Jsoup.connect(url).timeout(10000).get();
 			Elements table = doc.select(".beatmapListing tbody");
 			if (table.size() < 1) {
 				LOG.fatal("No table found. " + updatable.getCountry());
@@ -111,11 +114,22 @@ public class OsuLeaderboardScraper {
 			
 			for (int i = 1; i < tbody.children().size(); i++) {
 				Element row = tbody.children().get(i);
+				String username = row.children().get(1).text();
+				boolean isInactive = row.child(1).child(1).attr("style").equals("color:gray");
+				if (isInactive) {
+					remaining--;
+					if (remaining <= 0)
+						break;
+					// Skip checks for inactive players (no new top play in 2 months?)
+					// because their web stats sometimes don't match API results
+					// and forces the updater to keep checking the same player over and over again.
+					continue;
+				}
 				String onclick = row.attr("onclick");
 				String userId = onclick.substring(22, onclick.length() - 1);
 				String performanceRaw = row.children().get(4).text();
 				String accuracyRaw = row.children().get(2).text();
-				String username = row.children().get(1).text();
+				
 				double accuracy = Double.parseDouble(accuracyRaw.substring(0, accuracyRaw.length()-1));
 				int performance = Integer.parseInt(performanceRaw.substring(0, performanceRaw.length()-2).replace(",", ""));
 				result.add(new OsuPlayer(OsuPlayerIdentifier.of(userId, updatable.getMode()), username, updatable.getCountry(), (page-1)*50+i, performance, accuracy));

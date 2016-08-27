@@ -39,7 +39,6 @@ public class BanchoStatusChecker extends Thread implements EventListener {
 	private int requiredSuccesses;
 	private int requiredFailures;
 	private int timeout;
-	private String postChannel;
 	private Mustache msgOffline, msgOnline;
 	private List<List<String>> tags;
 	
@@ -60,7 +59,6 @@ public class BanchoStatusChecker extends Thread implements EventListener {
 		
 		requiredSuccesses = config.getInt("bancho.successes");
 		requiredFailures = config.getInt("bancho.failures");
-		postChannel = config.getString("bancho.channel");
 		
 		MustacheFactory mf = new DefaultMustacheFactory();
 		msgOffline = mf.compile(new StringReader(config.getString("bancho.msg-offline")), "offline");

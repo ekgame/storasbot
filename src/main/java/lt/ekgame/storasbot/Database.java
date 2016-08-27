@@ -282,7 +282,7 @@ public class Database {
 	public boolean addOrUpdateTrackedPlayer(TrackedPlayer tracker) throws SQLException {
 		try (Handle handle = dbi.open()) {
 			List<Map<String, Object>> rawData = handle.select("SELECT id FROM osu_user_tracker WHERE guild_id=? AND channel_id=? AND user_id=? AND gamemode=?",
-					tracker.getGuildId(), tracker.getChannelId(), tracker.getIdentifier().getUserId(), tracker.getIdentifier().getMode());
+					tracker.getGuildId(), tracker.getChannelId(), tracker.getIdentifier().getUserId(), tracker.getIdentifier().getMode().getValue());
 			
 			if (rawData.size() == 0) {
 				handle.insert("INSERT INTO osu_user_tracker (guild_id, channel_id, user_id, gamemode, top_number, min_pp) VALUES (?,?,?,?,?,?)",

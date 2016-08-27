@@ -60,7 +60,7 @@ public class StorasBot {
 			String token = config.getString("api.discord");
 			operators = config.getStringList("general.operators");
 			client = new JDABuilder().setBotToken(token)
-				//.addListener(new OsuTracker(osuUserCatche))
+				.addListener(new OsuTracker(osuUserCatche))
 				.addListener(commandHandler = new CommandListener())
 				.addListener(new BeatmapLinkExaminer())
 				.addListener(new AntiShitImageHosts())

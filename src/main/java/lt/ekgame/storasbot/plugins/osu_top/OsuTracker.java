@@ -56,7 +56,7 @@ public class OsuTracker extends Thread implements EventListener {
 				
 				// Players that require an update
 				OsuUpdatablePlayers updatablePlayers = new OsuUpdatablePlayers(loops == 1);
-				OsuLeaderboardScraper scraper = new OsuLeaderboardScraper(20);
+				OsuLeaderboardScraper scraper = new OsuLeaderboardScraper(10);
 				
 				// Handle scraping in parallel
 				for (Entry<CountryGroup, List<TrackedCountry>> entry : countries.entrySet()) {

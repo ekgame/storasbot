@@ -11,6 +11,7 @@ import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.CommandFlags;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
+import lt.ekgame.storasbot.commands.engine.DuplicateFlagException;
 import lt.ekgame.storasbot.plugins.osu_top.TrackedCountry;
 import lt.ekgame.storasbot.plugins.osu_top.TrackedPlayer;
 import lt.ekgame.storasbot.utils.Utils;
@@ -81,20 +82,24 @@ public class TrackOsuBase {
 		if (!subCommand.isPresent())
 			return context.replyError("What do you want me to do?");
 		
-		String sub = subCommand.get().toLowerCase();
-		if (sub.equals("user") || sub.equals("player") || sub.equals("u") || sub.equals("p"))
-			return handleUser(command, context, mode);
-		else if (sub.equals("country") || sub.equals("c"))
-			return handleCountry(command, context, mode);
-		else if (sub.equals("global") || sub.equals("g"))
-			return handleGlobal(command, context, mode);
-		else if (sub.equals("remove") || sub.equals("r"))
-			return handleRemove(command, context, mode);
-		
-		return context.replyError("What is \"" + Utils.escapeMarkdownBlock(sub) + "\"?");
+		try {
+			String sub = subCommand.get().toLowerCase();
+			if (sub.equals("user") || sub.equals("player") || sub.equals("u") || sub.equals("p"))
+				return handleUser(command, context, mode);
+			else if (sub.equals("country") || sub.equals("c"))
+				return handleCountry(command, context, mode);
+			else if (sub.equals("global") || sub.equals("g"))
+				return handleGlobal(command, context, mode);
+			else if (sub.equals("remove") || sub.equals("r"))
+				return handleRemove(command, context, mode);
+			
+			return context.replyError("What is \"" + Utils.escapeMarkdownBlock(sub) + "\"?");
+		} catch (DuplicateFlagException e) {
+			return context.replyError(e.getMessage());
+		}
 	}
 
-	private CommandResult handleUser(CommandIterator command, BotCommandContext context, OsuMode mode) {
+	private CommandResult handleUser(CommandIterator command, BotCommandContext context, OsuMode mode) throws DuplicateFlagException {
 		if (!Utils.hasCommandPermission(context.getGuild(), context.getSender(), Permission.MANAGE_SERVER))
 			return context.replyError("You must have the \"Manage Server\" permissions to use `track` commands.");
 		
@@ -136,7 +141,7 @@ public class TrackOsuBase {
 		}
 	}
 
-	private CommandResult handleCountry(CommandIterator command, BotCommandContext context, OsuMode mode) {
+	private CommandResult handleCountry(CommandIterator command, BotCommandContext context, OsuMode mode) throws DuplicateFlagException {
 		if (!Utils.hasCommandPermission(context.getGuild(), context.getSender(), Permission.MANAGE_SERVER))
 			return context.replyError("You must have the \"Manage Server\" permissions to use `track` commands.");
 		
@@ -152,11 +157,11 @@ public class TrackOsuBase {
 		return handleAddCountry(command, context, countryCode, mode);
 	}
 
-	private CommandResult handleGlobal(CommandIterator command, BotCommandContext context, OsuMode mode) {
+	private CommandResult handleGlobal(CommandIterator command, BotCommandContext context, OsuMode mode) throws DuplicateFlagException {
 		return handleAddCountry(command, context, null, mode);
 	}
 	
-	private CommandResult handleAddCountry(CommandIterator command, BotCommandContext context, CountryCode country, OsuMode mode) {
+	private CommandResult handleAddCountry(CommandIterator command, BotCommandContext context, CountryCode country, OsuMode mode) throws DuplicateFlagException {
 		if (!Utils.hasCommandPermission(context.getGuild(), context.getSender(), Permission.MANAGE_SERVER))
 			return context.replyError("You must have the \"Manage Server\" permissions to use `track` commands.");
 		

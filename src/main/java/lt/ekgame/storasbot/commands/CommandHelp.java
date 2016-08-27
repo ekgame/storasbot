@@ -11,6 +11,7 @@ import lt.ekgame.storasbot.commands.engine.CommandListener.CommandDefinition;
 import lt.ekgame.storasbot.utils.Utils;
 import lt.ekgame.storasbot.commands.engine.CommandReference;
 import lt.ekgame.storasbot.commands.engine.CommandResult;
+import lt.ekgame.storasbot.commands.engine.DuplicateFlagException;
 
 @CommandReference(isPrivate=true, isGuild=true, labels = {"help", "?"})
 public class CommandHelp implements Command<BotCommandContext> {
@@ -30,18 +31,22 @@ public class CommandHelp implements Command<BotCommandContext> {
 			String commandLabel = token.get();
 			Optional<CommandDefinition> oCommand = StorasBot.getCommandHandler().getCommandByName(commandLabel);
 			if (oCommand.isPresent()) {
-				CommandFlags flags = command.getFlags();
-				Command<BotCommandContext> theCommand = oCommand.get().getInstance();
-				String help = "```" + Utils.escapeMarkdownBlock(theCommand.getHelp(flags)) + "```";
-				context.reply(help);
-				return CommandResult.OK;
+				try {
+					CommandFlags flags = command.getFlags();
+					Command<BotCommandContext> theCommand = oCommand.get().getInstance();
+					String help = "```" + Utils.escapeMarkdownBlock(theCommand.getHelp(flags)) + "```";
+					context.reply(help);
+					return CommandResult.OK;
+				} catch (DuplicateFlagException e) {
+					return context.replyError(e.getMessage());
+				}
 			}
 			else {
 				return context.replyError("I don't know any **" + commandLabel + "** command.");
 			}
 		}
 		else {
-			context.reply("For a complete list of commands, visit https://bitbucket.org/ekgame/storasbot/wiki/Home.");
+			context.reply("For a complete list of commands, visit <http://bot.ekga.me/docs>.");
 			return CommandResult.OK;
 		}
 	}

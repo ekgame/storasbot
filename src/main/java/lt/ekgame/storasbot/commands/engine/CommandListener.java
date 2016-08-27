@@ -82,14 +82,19 @@ public class CommandListener extends ListenerAdapter {
 				return;
 			}
 			
-			Command<BotCommandContext> command = definition.getInstance();
-			CommandResult result = command.execute(iterator, theContext);
-			if (result == CommandResult.FAIL && failedCommand == null)
-				addFailedCommand(message, theContext);
-			else if (result == CommandResult.FAIL)
-				failedCommand.timestamp = System.currentTimeMillis();
-			else if (result == CommandResult.OK && failedCommand != null)
-				removeFailedCommand(failedCommand);
+			try {
+				Command<BotCommandContext> command = definition.getInstance();
+				CommandResult result = command.execute(iterator, theContext);
+				if (result == CommandResult.FAIL && failedCommand == null)
+					addFailedCommand(message, theContext);
+				else if (result == CommandResult.FAIL)
+					failedCommand.timestamp = System.currentTimeMillis();
+				else if (result == CommandResult.OK && failedCommand != null)
+					removeFailedCommand(failedCommand);
+			} catch (DuplicateFlagException e) {
+				theContext.replyError(e.getMessage());
+				return;
+			}
 		}
 		else {
 			theContext.reply(":grey_question: _I don't know what you want me to do._");

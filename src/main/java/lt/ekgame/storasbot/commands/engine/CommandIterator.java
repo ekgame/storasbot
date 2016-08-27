@@ -40,7 +40,7 @@ public class CommandIterator {
 		return Optional.empty();
 	}
 	
-	public CommandFlags getFlags() {
+	public CommandFlags getFlags() throws DuplicateFlagException {
 		Map<String, String> flags = new HashMap<>();
 		
 		while (true) {
@@ -53,7 +53,7 @@ public class CommandIterator {
 			String key = flag.get().toLowerCase();
 			String value = getFlagContent().orElse(null);
 			if (flags.containsKey(key))
-				throw new IllegalArgumentException("Duplicate flag \""+key+"\".");
+				throw new DuplicateFlagException("Duplicate flag \""+key+"\".");
 			flags.put(key, value);
 		}
 		
