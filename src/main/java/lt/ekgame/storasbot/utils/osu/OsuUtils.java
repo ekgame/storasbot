@@ -6,12 +6,12 @@ import java.util.List;
 
 import org.tillerino.osuApiModel.OsuApiScore;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 
 public class OsuUtils {
 	
 	public static List<OsuScore> getScores(OsuPlayerIdentifier identifier) throws NumberFormatException, IOException {
-		List<OsuApiScore> scores = StorasBot.getOsuApi().getUserTop(identifier.getUserId(), identifier.getMode(), 100);
+		List<OsuApiScore> scores = StorasDiscord.getOsuApi().getUserTop(identifier.getUserId(), identifier.getMode(), 100);
 		List<OsuScore> scoresConverted = new ArrayList<>();
 		int i = 1; 
 		for (OsuApiScore score : scores) {

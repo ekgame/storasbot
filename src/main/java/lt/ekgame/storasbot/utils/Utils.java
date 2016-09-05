@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -15,11 +16,12 @@ import org.apache.http.entity.ContentType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.common.base.Splitter;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.body.MultipartBody;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import net.dv8tion.jda.MessageBuilder;
 import net.dv8tion.jda.Permission;
 import net.dv8tion.jda.entities.Channel;
@@ -33,6 +35,48 @@ import net.dv8tion.jda.requests.Requester;
 import net.dv8tion.jda.utils.PermissionUtil;
 
 public class Utils {
+	
+	public static List<String> listSplitMaxLength(List<String> list, int maxLength) {
+		List<String> result = new ArrayList<>();
+		for (String item : list) {
+			if (item.length() > maxLength) {
+				for (int i = 0; i < item.length(); i += maxLength) {
+		        	String part = item.substring(i, Math.min(item.length(), i + maxLength));
+		        	result.add(part);
+		        }
+			}
+			else result.add(item);
+		}
+		return result;
+	}
+	
+	public static List<String> messageSplit(String message, int maxLength) {
+		List<String> list = Splitter.on('\n').splitToList(message);
+		list = listSplitMaxLength(list, maxLength-1);
+		
+		ListIterator<String> iterator = list.listIterator();
+		
+		List<String> result = new ArrayList<>();
+		String current = "";
+		
+		while (iterator.hasNext()) {
+			String line = iterator.next();
+			if (current.length() + line.length() + 1 > maxLength) {
+				iterator.previous();
+				result.add(current);
+				current = "";
+			}
+			else {
+				if (!current.isEmpty())
+					current += "\n";
+				current += line;
+			}
+		}
+		result.add(current);
+		return result;
+	}
+	
+	
 	
 	public static String trimLength(String text, int maxLength, String denoter) {
 		if (text.length() <= maxLength)
@@ -173,13 +217,13 @@ public class Utils {
     }
     
     public static boolean hasCommandPermission(Guild guild, User user, Permission perm) {
-    	if (StorasBot.isOperator(user))
+    	if (StorasDiscord.isOperator(user))
     		return true;
     	return PermissionUtil.checkPermission(user, perm, guild);
     }
     
     public static boolean hasCommandPermission(Channel channel, User user, Permission perm) {
-    	if (StorasBot.isOperator(user))
+    	if (StorasDiscord.isOperator(user))
     		return true;
     	return PermissionUtil.checkPermission(user, perm, channel);
     }

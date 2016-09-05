@@ -17,7 +17,7 @@ import javax.script.ScriptException;
 import org.apache.commons.lang3.StringUtils;
 
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.utils.Utils;
 import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.TextChannel;
@@ -44,7 +44,7 @@ public class CodeExecutor extends ListenerAdapter  {
 		this.original = original;
 		this.lastUpdate = System.currentTimeMillis();
 		
-		StorasBot.sendMessage((TextChannel)original.getChannel(), "```Executing...```", (message) -> {
+		StorasDiscord.sendMessage((TextChannel)original.getChannel(), "```Executing...```", (message) -> {
 			response = message;
 			ExecutorService executor = Executors.newSingleThreadExecutor();
 			executor.execute(() -> runCode(false));
@@ -81,11 +81,11 @@ public class CodeExecutor extends ListenerAdapter  {
 	private void runCode(boolean update) {
 		timesRunned++;
 		if (update)
-			StorasBot.editMessage(response, "```Please wait...```");
+			StorasDiscord.editMessage(response, "```Please wait...```");
 		
 		String code = getCode(original, "eval");
 		if (code == null) {
-			StorasBot.editMessage(response, "Result: ```Nothing to execute.```");
+			StorasDiscord.editMessage(response, "Result: ```Nothing to execute.```");
 		}
 		else {
 			ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -139,9 +139,9 @@ public class CodeExecutor extends ListenerAdapter  {
 			        if (timesRunned > 1)
 			        	result += String.format(" `Executions: %d` ", timesRunned); 
 			        
-			        StorasBot.editMessage(response, result);
+			        StorasDiscord.editMessage(response, result);
 				} catch (Exception e) {
-					StorasBot.editMessage(response, String.format("**Error:** ```diff\n- %s```", e.getMessage()));
+					StorasDiscord.editMessage(response, String.format("**Error:** ```diff\n- %s```", e.getMessage()));
 				}
 			});
 			
@@ -151,7 +151,7 @@ public class CodeExecutor extends ListenerAdapter  {
 					Thread.sleep(5000);
 					if (!future.isDone() && !future.isCancelled()) {
 						future.cancel(true);
-						StorasBot.editMessage(response, String.format("**Error:** ```diff\n- %s```", "Timeout - code took too long to complete."));
+						StorasDiscord.editMessage(response, String.format("**Error:** ```diff\n- %s```", "Timeout - code took too long to complete."));
 					}
 				} catch (Exception e) {}
 			});
@@ -161,7 +161,7 @@ public class CodeExecutor extends ListenerAdapter  {
 	@Override
 	public void onGuildMessageUpdate(GuildMessageUpdateEvent event) {
 		if (System.currentTimeMillis() - lastUpdate > 10*60*1000) {
-			StorasBot.getJDA().removeEventListener(this);
+			StorasDiscord.getJDA().removeEventListener(this);
 		}
 		else if (event.getMessage().getId().equals(original.getId())) {
 			lastUpdate = System.currentTimeMillis();

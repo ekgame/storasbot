@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.hooks.ListenerAdapter;
@@ -22,10 +22,10 @@ public class AntiShitImageHosts extends ListenerAdapter {
 	
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-		if (event.getAuthor().equals(StorasBot.getJDA().getSelfInfo()))
+		if (event.getAuthor().equals(StorasDiscord.getJDA().getSelfInfo()))
 			return; // ignore own messages
 		
-		Boolean enabled = StorasBot.getSettings(event.getGuild()).get(Setting.ASIH, Boolean.class);
+		Boolean enabled = StorasDiscord.getSettings(event.getGuild()).get(Setting.ASIH, Boolean.class);
 		if (!enabled)
 			return; // don't process if disabled
 		
@@ -33,7 +33,7 @@ public class AntiShitImageHosts extends ListenerAdapter {
 		Matcher matcher = HTTP_URL.matcher(content);
 		while (matcher.find()) {
 			if (isBlacklisted(matcher.group(3).toLowerCase(), matcher.group(0).toLowerCase())) {
-				StorasBot.sendMessage(event.getChannel(), event.getAuthor().getAsMention() + " " + REPLY);
+				StorasDiscord.sendMessage(event.getChannel(), event.getAuthor().getAsMention() + " " + REPLY);
 				break;
 			}
 		}

@@ -32,7 +32,7 @@ import net.dv8tion.jda.hooks.ListenerAdapter;
 import net.dv8tion.jda.utils.SimpleLog;
 import net.dv8tion.jda.utils.SimpleLog.Level;
 
-public class StorasBot {
+public class StorasDiscord {
 	
 	private static JDA client;
 	private static Database database;

@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import com.neovisionaries.i18n.CountryCode;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.CommandFlags;
 import lt.ekgame.storasbot.commands.engine.CommandIterator;
@@ -122,14 +122,14 @@ public class TrackOsuBase {
 			return context.replyError("Both \"p\" and \"pp\" flags can not be set to 0.");
 		
 		try {
-			OsuUser user = StorasBot.getOsuApi().getUserByUsername(oUsername.get(), mode);
+			OsuUser user = StorasDiscord.getOsuApi().getUserByUsername(oUsername.get(), mode);
 			if (user == null) {
 				return context.replyError("That is not a player I know of.");
 			}
 			else {
 				TrackedPlayer tracker = new TrackedPlayer(context.getGuild(), context.getTextChannel(), user.getIdentifier(), personalTop, ppThreshold);
 				try {
-					StorasBot.getDatabase().addOrUpdateTrackedPlayer(tracker);
+					StorasDiscord.getDatabase().addOrUpdateTrackedPlayer(tracker);
 					return context.replyOk(responseTrackingPlayer(user.getUserName(), tracker));
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -186,7 +186,7 @@ public class TrackOsuBase {
 				country == null ? null : country.getAlpha2(), mode, leaderboardTop, personalTop, ppThreshold);
 		
 		try {
-			StorasBot.getDatabase().addOrUpdateTrackedCountry(tracker);
+			StorasDiscord.getDatabase().addOrUpdateTrackedCountry(tracker);
 			return context.replyOk(responseTrackingCountry(country, tracker));
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -212,11 +212,11 @@ public class TrackOsuBase {
 				return context.replyError("Who do you want me to remove? Try `$help track -r`.");
 			
 			try {
-				OsuUser user = StorasBot.getOsuApi().getUserByUsername(oToRemove.get(), mode);
+				OsuUser user = StorasDiscord.getOsuApi().getUserByUsername(oToRemove.get(), mode);
 				if (user == null) 
 					return context.replyError("That's not a player I know of.");
 				
-				if (StorasBot.getDatabase().removeTrackedPlayer(guild, channel, ""+user.getUserId(), mode)) {
+				if (StorasDiscord.getDatabase().removeTrackedPlayer(guild, channel, ""+user.getUserId(), mode)) {
 					return context.replyOk("No longer tracking **" + user.getUserName() + "** " + mode.getName() + ".");
 				}
 				else return context.replyError("I'm not even tracking **" + user.getUserName() + "**.");
@@ -235,14 +235,14 @@ public class TrackOsuBase {
 			if (countryCode == null || countryCode == CountryCode.UNDEFINED)
 				return context.replyError("\"" + country + "\" is not a country that I know of.");
 			
-			if (StorasBot.getDatabase().removeTrackedCountry(guild, channel, countryCode.getAlpha2(), mode)) 
+			if (StorasDiscord.getDatabase().removeTrackedCountry(guild, channel, countryCode.getAlpha2(), mode)) 
 				return context.replyOk("No longer tracking " + countryCode.getName() + " " + mode.getName() + " leaderboard.");
 			else
 				return context.replyError("I'm not even tracking the " + mode.getName() + " global leaderboard.");
 			
 		}
 		else if (sub.equals("global") || sub.equals("g")) {
-			if (StorasBot.getDatabase().removeTrackedCountry(guild, channel, null, mode))
+			if (StorasDiscord.getDatabase().removeTrackedCountry(guild, channel, null, mode))
 				return context.replyOk("No longer tracking the global " + mode.getName() + " leaderboard.");
 			else
 				return context.replyError("I'm not even tracking the global leaderboard.");

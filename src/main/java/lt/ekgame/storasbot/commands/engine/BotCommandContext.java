@@ -1,6 +1,6 @@
 package lt.ekgame.storasbot.commands.engine;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.plugins.Settings;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.Message;
@@ -52,17 +52,17 @@ public class BotCommandContext {
 	}
 	
 	public Settings getSettings() {
-		return StorasBot.getSettings(getGuild());
+		return StorasDiscord.getSettings(getGuild());
 	}
 	
 	public void reply(String message) {
 		if (reply == null) {
-			StorasBot.sendMessage(getChannel(), message, (msg) -> {
+			StorasDiscord.sendMessage(getChannel(), message, (msg) -> {
 				reply = msg;
 			});
 		}
 		else {
-			StorasBot.editMessage(reply, message);
+			StorasDiscord.editMessage(reply, message);
 		}
 	}
 	

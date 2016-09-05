@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import lt.ekgame.storasbot.Database;
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import net.dv8tion.jda.utils.SimpleLog;
 
 public class OsuUserCatche {
@@ -20,7 +20,7 @@ public class OsuUserCatche {
 	
 	public void updateCatche() throws SQLException {
 		catche.clear();
-		Database db = StorasBot.getDatabase();
+		Database db = StorasDiscord.getDatabase();
 		addPlayers(db.getTrackedCountryPlayers(null, OsuMode.OSU));
 		addPlayers(db.getTrackedCountryPlayers(null, OsuMode.TAIKO));
 		addPlayers(db.getTrackedCountryPlayers(null, OsuMode.CATCH));

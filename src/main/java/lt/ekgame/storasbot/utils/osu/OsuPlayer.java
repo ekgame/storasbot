@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 
 public class OsuPlayer {
 	
@@ -38,17 +38,17 @@ public class OsuPlayer {
 	}
 
 	public OsuPlayer getFromAPI() throws IOException {
-		OsuUser user = StorasBot.getOsuApi().getUser(getUserId(), getGamemode());
+		OsuUser user = StorasDiscord.getOsuApi().getUser(getUserId(), getGamemode());
 		return new OsuPlayer(identifier, user.getUserName(), user.getCountry(), user.getPp(), user.getRank(), user.getCountryRank(), user.getAccuracy());
 	}
 	
 	public OsuPlayer getFromDatabase() throws IOException {
-		OsuPlayer user = StorasBot.getDatabase().getTrackedUser(identifier);
+		OsuPlayer user = StorasDiscord.getDatabase().getTrackedUser(identifier);
 		return new OsuPlayer(identifier, user.getUsername(), user.getCountry(), user.getPerformance(), user.getGlobalRank(), user.getCountryRank(), user.getAccuracy());
 	}
 	
 	public List<OsuScore> getCatchedScores() throws SQLException {
-		return StorasBot.getDatabase().getUserScores(identifier);
+		return StorasDiscord.getDatabase().getUserScores(identifier);
 	}
 
 	public String getUserId() {

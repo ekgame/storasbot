@@ -23,7 +23,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
 import lt.ekgame.storasbot.commands.engine.CommandFlags;
@@ -98,7 +98,7 @@ public class CommandServer implements Command<BotCommandContext> {
 	private String getBinsInfo(Guild guild) {
 		String binsInfo = "UNKNOWN";
 		try {
-			List<Pair<String, Long>> mostUsedBins = StorasBot.getDatabase().getTopBins(guild);
+			List<Pair<String, Long>> mostUsedBins = StorasDiscord.getDatabase().getTopBins(guild);
 			if (mostUsedBins.size() == 0) {
 				binsInfo = "NONE DEFINED";
 			}

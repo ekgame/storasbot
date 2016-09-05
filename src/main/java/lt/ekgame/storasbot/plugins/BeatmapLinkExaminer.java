@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.utils.TableRenderer;
 import lt.ekgame.storasbot.utils.Utils;
 import lt.ekgame.storasbot.utils.osu.OsuBeatmapCatche;
@@ -40,10 +40,10 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 	
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-		if (event.getAuthor().equals(StorasBot.getJDA().getSelfInfo()))
+		if (event.getAuthor().equals(StorasDiscord.getJDA().getSelfInfo()))
 			return; // ignore own messages
 		
-		Boolean enabled = StorasBot.getSettings(event.getGuild()).get(Setting.BEATMAP_EXAMINER, Boolean.class);
+		Boolean enabled = StorasDiscord.getSettings(event.getGuild()).get(Setting.BEATMAP_EXAMINER, Boolean.class);
 		if (!enabled)
 			return; // don't process if disabled
 		
@@ -66,7 +66,7 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 				}
 			}
 			
-			StorasBot.sendMessage((TextChannel)event.getMessage().getChannel(), message);
+			StorasDiscord.sendMessage((TextChannel)event.getMessage().getChannel(), message);
 		}
 	}
 	
@@ -82,7 +82,7 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 			generateVersion(table, beatmap);
 		}
 		else {
-			List<OsuApiBeatmap> beatmaps = StorasBot.getOsuApi().getBeatmapSet(map.id);
+			List<OsuApiBeatmap> beatmaps = StorasDiscord.getOsuApi().getBeatmapSet(map.id);
 			if (beatmaps == null) return null;
 			
 			List<OsuApiBeatmap> beatmapsSorted = beatmaps.stream()

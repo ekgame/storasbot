@@ -22,7 +22,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.typesafe.config.Config;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.utils.Utils;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.TextChannel;
@@ -132,11 +132,11 @@ public class BanchoStatusChecker extends Thread implements EventListener {
 	
 	private List<TextChannel> getChannels() {
 		List<TextChannel> channels = new ArrayList<>();
-		for (Guild guild : StorasBot.getJDA().getGuilds()) {
-			Settings settings = StorasBot.getSettings(guild);
+		for (Guild guild : StorasDiscord.getJDA().getGuilds()) {
+			Settings settings = StorasDiscord.getSettings(guild);
 			if (settings.get(Setting.BANCHO_STATUS, Boolean.class)) {
 				String channelId = settings.get(Setting.BANCHO_STATUS_CHANNEL, String.class);
-				TextChannel channel = StorasBot.getJDA().getTextChannelById(channelId);
+				TextChannel channel = StorasDiscord.getJDA().getTextChannelById(channelId);
 				if (channel != null)
 					channels.add(channel);
 			}
@@ -155,7 +155,7 @@ public class BanchoStatusChecker extends Thread implements EventListener {
 		String message = writer.toString();
 		
 		for (TextChannel channel : getChannels()) {
-			StorasBot.sendMessage(channel, message);
+			StorasDiscord.sendMessage(channel, message);
 		}
 	}
 	
@@ -169,6 +169,6 @@ public class BanchoStatusChecker extends Thread implements EventListener {
 		String message = writer.toString();
 		
 		for (TextChannel channel : getChannels())
-			StorasBot.sendMessage(channel, message);
+			StorasDiscord.sendMessage(channel, message);
 	}
 }

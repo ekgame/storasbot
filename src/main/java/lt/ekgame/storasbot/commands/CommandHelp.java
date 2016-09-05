@@ -2,7 +2,7 @@ package lt.ekgame.storasbot.commands;
 
 import java.util.Optional;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
 import lt.ekgame.storasbot.commands.engine.CommandFlags;
@@ -29,7 +29,7 @@ public class CommandHelp implements Command<BotCommandContext> {
 		Optional<String> token = command.getToken();
 		if (token.isPresent()) {
 			String commandLabel = token.get();
-			Optional<CommandDefinition> oCommand = StorasBot.getCommandHandler().getCommandByName(commandLabel);
+			Optional<CommandDefinition> oCommand = StorasDiscord.getCommandHandler().getCommandByName(commandLabel);
 			if (oCommand.isPresent()) {
 				try {
 					CommandFlags flags = command.getFlags();

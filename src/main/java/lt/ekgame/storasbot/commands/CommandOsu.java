@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
 import lt.ekgame.storasbot.commands.engine.CommandFlags;
@@ -77,7 +77,7 @@ public class CommandOsu implements Command<BotCommandContext> {
 			
 			for (String username : usernames) {
 				try {
-					OsuUser user = StorasBot.getOsuApi().getUserByUsername(username, mode);
+					OsuUser user = StorasDiscord.getOsuApi().getUserByUsername(username, mode);
 					if (user != null) 
 						users.add(user);
 					else
@@ -104,7 +104,7 @@ public class CommandOsu implements Command<BotCommandContext> {
 				table.addRow(getObjects("Total score" , users, user -> number.format(user.getTotalScore())));
 				table.addRow(getObjects("Ranked score", users, user -> number.format(user.getRankedScore())));
 				table.addRow(getObjects("Level", users,        user -> user.formatLevel()));
-				message += "```" + table.build() + "```";
+				message += "```cs\n" + table.build() + "```";
 			}
 			
 			if (failed.size() > 0)

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.math3.util.Precision;
 
 import lt.ekgame.storasbot.Database;
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.utils.osu.OsuPlayer;
 import lt.ekgame.storasbot.utils.osu.OsuPlayerIdentifier;
 import lt.ekgame.storasbot.utils.osu.OsuScore;
@@ -135,7 +135,7 @@ public class OsuUserUpdater {
 					LOG.info("Updated score = " + catchedScore.getPerformance() + " -> " + score.getPerformance());
 				}
 			}
-			Database db = StorasBot.getDatabase();
+			Database db = StorasDiscord.getDatabase();
 			db.addScores(updated.getIdentifier(), newScores);
 			db.updateScores(updated.getIdentifier(), updatedScores);
 			db.updateTrackedUser(updated);
@@ -147,8 +147,8 @@ public class OsuUserUpdater {
 			OsuPlayer updated = player.getFromAPI();
 			LOG.info("New user: " + updated.getUsername());
 			List<OsuScore> scores = OsuUtils.getScores(player.getIdentifier());
-			StorasBot.getDatabase().addScores(updated.getIdentifier(), scores);
-			StorasBot.getDatabase().addTrackedUser(updated);
+			StorasDiscord.getDatabase().addScores(updated.getIdentifier(), scores);
+			StorasDiscord.getDatabase().addTrackedUser(updated);
 			catche.updatePlayer(updated);
 		}
 	}

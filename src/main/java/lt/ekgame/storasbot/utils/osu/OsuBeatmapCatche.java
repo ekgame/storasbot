@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 
 public class OsuBeatmapCatche {
 	
@@ -24,7 +24,7 @@ public class OsuBeatmapCatche {
 			OsuApiBeatmap beatmap = null;
 			for (int i = 0; i < 3; i++) {
 				try {
-					beatmap = StorasBot.getOsuApi().getBeatmap(beatmapId);
+					beatmap = StorasDiscord.getOsuApi().getBeatmap(beatmapId);
 					break;
 				} catch (NumberFormatException | IOException e) {
 					e.printStackTrace();

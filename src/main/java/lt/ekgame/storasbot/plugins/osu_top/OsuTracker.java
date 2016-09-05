@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.utils.osu.OsuMode;
 import lt.ekgame.storasbot.utils.osu.OsuPlayer;
 import lt.ekgame.storasbot.utils.osu.OsuPlayerIdentifier;
@@ -33,7 +33,7 @@ public class OsuTracker extends Thread implements EventListener {
 	
 	@Override
 	public void onEvent(Event event) {
-		if (event instanceof ReadyEvent) {
+		if (event instanceof ReadyEvent && StorasDiscord.getConfig().getBoolean("tracker.enabled")) {
 			start();
 		}
 	}
@@ -48,8 +48,8 @@ public class OsuTracker extends Thread implements EventListener {
 					userCatche.updateCatche();
 				
 				// Registered trackers
-				List<TrackedCountry> countryTrackers = StorasBot.getDatabase().getTrackedCountries();
-				List<TrackedPlayer> playerTrackers = StorasBot.getDatabase().getTrackedPlayers();
+				List<TrackedCountry> countryTrackers = StorasDiscord.getDatabase().getTrackedCountries();
+				List<TrackedPlayer> playerTrackers = StorasDiscord.getDatabase().getTrackedPlayers();
 				
 				// Trackers grouped by leaderboard and gamemode
 				Map<CountryGroup, List<TrackedCountry>> countries = groupCountries(countryTrackers);

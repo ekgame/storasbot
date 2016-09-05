@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
 import lt.ekgame.storasbot.commands.engine.CommandFlags;
@@ -37,7 +37,7 @@ public class CommandPrune implements Command<BotCommandContext> {
 		TextChannel channel = context.getTextChannel();
 		User sender = context.getSender();
 		
-		if (!Utils.hasCommandPermission(channel, StorasBot.getJDA().getSelfInfo(), Permission.MESSAGE_MANAGE))
+		if (!Utils.hasCommandPermission(channel, StorasDiscord.getJDA().getSelfInfo(), Permission.MESSAGE_MANAGE))
 			return context.replyError("I don't have permissions to delete messages.");
 		
 		if (Utils.hasCommandPermission(channel, sender, Permission.MESSAGE_MANAGE)) {

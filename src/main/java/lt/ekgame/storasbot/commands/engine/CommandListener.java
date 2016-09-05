@@ -12,7 +12,7 @@ import java.util.Set;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.PrivateChannel;
@@ -97,7 +97,7 @@ public class CommandListener extends ListenerAdapter {
 			}
 		}
 		else {
-			theContext.reply(":grey_question: _I don't know what you want me to do._");
+			//theContext.reply(":grey_question: _I don't know what you want me to do._");
 			if (failedCommand == null)
 				addFailedCommand(message, theContext);
 			else
@@ -110,15 +110,15 @@ public class CommandListener extends ListenerAdapter {
 		if (command.startsWith(prefix)) 
 			return command.substring(prefix.length());
 		
-		if (command.startsWith(StorasBot.getPrefix(guild)))
-			return command.substring(StorasBot.getPrefix(guild).length() + 1);
+		if (command.startsWith(StorasDiscord.getPrefix(guild)))
+			return command.substring(StorasDiscord.getPrefix(guild).length() + 1);
 		
 		return null;
 	}
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
-		if (event.getAuthor().equals(StorasBot.getJDA().getSelfInfo()))
+		if (event.getAuthor().equals(StorasDiscord.getJDA().getSelfInfo()))
 			return; // no recursive commands
 		
 		String command = getRawCommand(event.getMessage().getContent(), event.getGuild());

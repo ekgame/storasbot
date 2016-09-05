@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import lt.ekgame.storasbot.StorasBot;
+import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
 import lt.ekgame.storasbot.commands.engine.CommandFlags;
@@ -78,13 +78,13 @@ public class CommandBin implements Command<BotCommandContext> {
 		String tag = oTag.get();
 		
 		try {
-			BinTag bin = StorasBot.getDatabase().getBin(guild, tag);
+			BinTag bin = StorasDiscord.getDatabase().getBin(guild, tag);
 			if (bin == null)  {
 				return context.replyError("Can't delete: bin doesn't exist.");
 			}
 			
 			if (canEdit(guild, sender, bin.getUserId())) {
-				StorasBot.getDatabase().deleteBin(guild, bin.getId());
+				StorasDiscord.getDatabase().deleteBin(guild, bin.getId());
 				context.reply(":ok_hand:");
 				return CommandResult.OK;
 			}
@@ -114,12 +114,12 @@ public class CommandBin implements Command<BotCommandContext> {
 		String content = oContent.get();
 		
 		try {
-			BinTag bin = StorasBot.getDatabase().getBin(guild, tag);
+			BinTag bin = StorasDiscord.getDatabase().getBin(guild, tag);
 			if (bin == null)
 				return context.replyError("That bin doesn't exist. Use `add` to create it.");
 			
 			if (canEdit(guild, sender, bin.getUserId())) {
-				StorasBot.getDatabase().editBin(guild, bin.getId(), content);
+				StorasDiscord.getDatabase().editBin(guild, bin.getId(), content);
 				context.reply(":ok_hand:");
 				return CommandResult.OK;
 			}
@@ -149,14 +149,14 @@ public class CommandBin implements Command<BotCommandContext> {
 		String content = oContent.get();
 		
 		try {
-			BinTag bin = StorasBot.getDatabase().getBin(guild, tag);
+			BinTag bin = StorasDiscord.getDatabase().getBin(guild, tag);
 			if (bin != null)
 				return context.replyError("That bin already taken.");
 			
 			if (subCommands.contains(tag))
 				return context.replyError("That bin tag is not allowed.");
 
-			StorasBot.getDatabase().addBin(guild, sender.getId(), tag, content);
+			StorasDiscord.getDatabase().addBin(guild, sender.getId(), tag, content);
 			context.reply(":ok_hand:");
 			return CommandResult.OK;
 		} catch (SQLException e) {
@@ -168,11 +168,11 @@ public class CommandBin implements Command<BotCommandContext> {
 	private CommandResult display(CommandIterator command, String tag, BotCommandContext context) {
 		Guild guild = context.getGuild();
 		try {
-			BinTag bin = StorasBot.getDatabase().getBin(guild, tag);
+			BinTag bin = StorasDiscord.getDatabase().getBin(guild, tag);
 			if (bin == null)
 				return context.replyError("That bin doesn't exist.");
 			
-			StorasBot.getDatabase().incrementBinUsage(guild, bin.getId());
+			StorasDiscord.getDatabase().incrementBinUsage(guild, bin.getId());
 			context.reply(bin.getContent());
 			return CommandResult.OK;
 		} catch (SQLException e) {
@@ -188,7 +188,7 @@ public class CommandBin implements Command<BotCommandContext> {
 		
 		try {
 			Guild guild = context.getGuild();
-			long count = StorasBot.getDatabase().getBinsCount(guild);
+			long count = StorasDiscord.getDatabase().getBinsCount(guild);
 			if (count == 0)
 				
 				return context.replyOk("The bin is empty.");
@@ -196,7 +196,7 @@ public class CommandBin implements Command<BotCommandContext> {
 			if (page > pages)
 				return context.replyError("That page doesn't exist.");
 			else {
-				List<String> tags = StorasBot.getDatabase().getBinList(guild, PAGE_SIZE, page);
+				List<String> tags = StorasDiscord.getDatabase().getBinList(guild, PAGE_SIZE, page);
 				String result = Utils.escapeMarkdownBlock(tags.stream().collect(Collectors.joining(", ")));
 				context.reply(String.format("**Page %d/%d:** ```%s```", page, pages, result));
 				return CommandResult.OK;
@@ -216,7 +216,7 @@ public class CommandBin implements Command<BotCommandContext> {
 		String tag = oTag.get();
 		Guild guild = context.getGuild();
 		try {
-			BinTag bin = StorasBot.getDatabase().getBin(guild, tag);
+			BinTag bin = StorasDiscord.getDatabase().getBin(guild, tag);
 			if (bin == null)
 				return context.replyError("That bin doesn't exist.");
 			
@@ -232,12 +232,12 @@ public class CommandBin implements Command<BotCommandContext> {
 	private CommandResult random(CommandIterator command, BotCommandContext context) {
 		try {
 			Guild guild = context.getGuild();
-			long count = StorasBot.getDatabase().getBinsCount(guild);
+			long count = StorasDiscord.getDatabase().getBinsCount(guild);
 			if (count == 0)
 				return context.replyOk("The bin is empty.");
 			
 			int offset = new Random().nextInt((int)count);
-			BinTag bin = StorasBot.getDatabase().getBinOffset(guild, offset);
+			BinTag bin = StorasDiscord.getDatabase().getBinOffset(guild, offset);
 			if (bin == null)
 				return context.replyError("You have to `add` bins first.");
 				
