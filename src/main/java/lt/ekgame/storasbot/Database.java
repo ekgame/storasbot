@@ -59,7 +59,7 @@ public class Database {
 			if (result.size() == 0)
 				handle.insert("INSERT INTO guild_settings (guild_id, setting, value) VALUES (?, ?, ?)", guild.getId(), setting.getSQLName(), value);
 			else
-				handle.update("UPDATE guild_settings SET value=? WHERE setting=?", value, setting.getSQLName());
+				handle.update("UPDATE guild_settings SET value=? WHERE guild_id=? AND setting=?", value, guild.getId(), setting.getSQLName());
 		}
 	}
 	
