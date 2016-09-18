@@ -18,6 +18,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 import lt.ekgame.storasbot.utils.Utils;
+import lt.ekgame.storasbot.utils.osu.OsuMode;
 import lt.ekgame.storasbot.utils.osu.OsuPlayer;
 import lt.ekgame.storasbot.utils.osu.OsuScore;
 import net.dv8tion.jda.entities.Guild;
@@ -50,10 +51,11 @@ public class MessageFormatter {
 		OsuPlayer player = scoreUpdate.getNewPlayer();
 		OsuScore oldScore = scoreUpdate.getOldScore();
 		OsuScore score = scoreUpdate.getNewScore();
+		OsuMode gamemode = player.getGamemode();
 		
 		Map<String, String> scope = new HashMap<>();
 		scope.put("player", Utils.escapeMarkdown(player.getUsername()));
-		scope.put("mode", player.getGamemode().getName());
+		scope.put("mode", gamemode.getName());
 		scope.put("global_rank", player.getGlobalRank() + getDiff(oldPlayer.getGlobalRank(), player.getGlobalRank(), true));
 		scope.put("country", player.getCountry().toUpperCase());
 		scope.put("country_rank", player.getCountryRank() + getDiff(oldPlayer.getCountryRank(), player.getCountryRank(), true));
@@ -75,8 +77,8 @@ public class MessageFormatter {
 		
 		scope.put("rank", getRankString(score));
 		scope.put("score", decimalFormat.format(score.getScore()));
-		double accuracyOld = oldScore == null ? score.getAccuracy() : oldScore.getAccuracy();
-		scope.put("accuracy", decimalFormat.format(score.getAccuracy()) + "%" + getDiff(accuracyOld, score.getAccuracy(), false));
+		double accuracyOld = oldScore == null || gamemode == OsuMode.OSU ? score.getAccuracy(gamemode) : oldScore.getAccuracy(gamemode);
+		scope.put("accuracy", decimalFormat.format(score.getAccuracy(gamemode)) + "%" + getDiff(accuracyOld, score.getAccuracy(gamemode), false));
 		scope.put("mods", getModsString(score.getMods()));
 		double performaceOld = oldScore == null ? score.getPerformance() : oldScore.getPerformance();
 		scope.put("performance_new", decimalFormat.format(score.getPerformance()) + "pp" + getDiff(performaceOld, score.getPerformance(), false));

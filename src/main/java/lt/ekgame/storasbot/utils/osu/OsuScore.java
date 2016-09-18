@@ -10,6 +10,7 @@ public class OsuScore {
 	private double performance;
 	
 	private int count300, count100, count50, countMiss, maxCombo;
+	private int countGeki, countKatu;
 	private int personalTop = -1;
 	private long score, timestamp;
 	
@@ -38,7 +39,9 @@ public class OsuScore {
 		this.mods        = score.getMods();
 		this.performance = score.getPp();
 		
+		this.countGeki = score.getCountGeki();
 		this.count300  = score.getCount300();
+		this.countKatu = score.getCountKatu();
 		this.count100  = score.getCount100();
 		this.count50   = score.getCount50();
 		this.countMiss = score.getCountMiss();
@@ -107,8 +110,28 @@ public class OsuScore {
 		return timestamp;
 	}
 
-	public double getAccuracy() {
-		return 100*(6*count300 + 2*count100 + count50)/(double)(6*(count300 + count100 + count50 + countMiss));
+	public double getAccuracy(OsuMode mode) {
+		if (mode == OsuMode.OSU) {
+			int total = count300 + count100 + count50 + countMiss;
+			if (total == 0) return 0;
+			return 100*(6*count300 + 2*count100 + count50)/(double)(6*total);
+		}
+		else if (mode == OsuMode.TAIKO) {
+			int total = count300 + count100 + count50 + countMiss;
+			if (total == 0) return 0;
+			return 100*(2*count300 + count100)/(double)(2*total);
+		}
+		else if (mode == OsuMode.CATCH) {
+			int total = count300 + count100 + countKatu + count50 + countMiss;
+			if (total == 0) return 0;
+			return 100*(count300 + count100 + count50)/(double)(6*total);
+		}
+		else if (mode == OsuMode.MANIA) {
+			int total = countGeki + count300 + count100 + countKatu + count50 + countMiss;
+			if (total == 0) return 0;
+			return 100*(6*(count300 + countGeki) + 2*count100 + 4*countKatu + count50)/(double)(6*total);
+		}
+		return -1;
 	}
 
 	public String getRank() {
