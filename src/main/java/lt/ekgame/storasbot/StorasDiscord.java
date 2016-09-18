@@ -27,8 +27,6 @@ import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.MessageChannel;
 import net.dv8tion.jda.entities.User;
-import net.dv8tion.jda.events.ReadyEvent;
-import net.dv8tion.jda.hooks.ListenerAdapter;
 import net.dv8tion.jda.utils.SimpleLog;
 import net.dv8tion.jda.utils.SimpleLog.Level;
 

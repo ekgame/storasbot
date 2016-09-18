@@ -1,6 +1,5 @@
 package lt.ekgame.storasbot.commands.eval;
 
-import lt.ekgame.storasbot.StorasDiscord;
 import lt.ekgame.storasbot.commands.engine.BotCommandContext;
 import lt.ekgame.storasbot.commands.engine.Command;
 import lt.ekgame.storasbot.commands.engine.CommandFlags;

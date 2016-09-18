@@ -1,8 +1,5 @@
 package lt.ekgame.storasbot.commands;
 
-import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.sql.SQLException;
@@ -12,13 +9,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.general.SeriesException;
-import org.jfree.data.time.Hour;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
-
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
@@ -48,7 +38,7 @@ public class CommandServer implements Command<BotCommandContext> {
 		  + "most_used_bins: {{bins-info}}\n"
 		  + "```";
 	
-	private static int IMAGE_WIDTH = 500, IMAGE_HEIGHT = 200;
+	//private static int IMAGE_WIDTH = 500, IMAGE_HEIGHT = 200;
 	
 	static {
 		MustacheFactory mf = new DefaultMustacheFactory();
@@ -113,7 +103,7 @@ public class CommandServer implements Command<BotCommandContext> {
 		return binsInfo;
 	}
 	
-	private BufferedImage getChartImage(Guild guild) {
+	/*private BufferedImage getChartImage(Guild guild) {
 		BufferedImage image = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D graphics = image.createGraphics();
 		getMessageChart(guild).draw(graphics, new Rectangle2D.Double(0, 0, image.getWidth(), image.getHeight()));
@@ -138,5 +128,5 @@ public class CommandServer implements Command<BotCommandContext> {
 		TimeSeriesCollection dataset = new TimeSeriesCollection(series);
 		
 		return ChartFactory.createTimeSeriesChart("Computing Test", "Seconds", "Value", dataset, false, false, false);
-	}
+	}*/
 }
