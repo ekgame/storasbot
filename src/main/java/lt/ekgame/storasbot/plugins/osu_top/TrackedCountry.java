@@ -9,8 +9,12 @@ import lt.ekgame.storasbot.utils.Tracker;
 import lt.ekgame.storasbot.utils.osu.OsuMode;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.TextChannel;
+import net.dv8tion.jda.utils.SimpleLog;
 
 public class TrackedCountry implements ScoreHandler, Tracker {
+	
+	private static SimpleLog LOG = SimpleLog.getLog("TrackedCountry");
+	
 	/*
 	 * is country == null then it's global
 	 */
@@ -66,6 +70,11 @@ public class TrackedCountry implements ScoreHandler, Tracker {
 		return minPerformance;
 	}
 	
+	public void removeTracker() {
+		if (StorasDiscord.getDatabase().removeCountryTrackerByChannel(channelId))
+			LOG.info("Removing tracker (" + channelId + "): " + country + " " + gamemode);
+	}
+	
 	public void handleScoreUpdates(List<OsuScoreUpdate> scores) {
 		for (OsuScoreUpdate score : scores) {
 			int leaderboardRank = country == null ? score.getNewPlayer().getGlobalRank() : score.getNewPlayer().getCountryRank();
@@ -78,7 +87,8 @@ public class TrackedCountry implements ScoreHandler, Tracker {
 				Guild guild = StorasDiscord.getJDA().getGuildById(guildId);
 				TextChannel channel = StorasDiscord.getJDA().getTextChannelById(channelId);
 				if (guild == null || channel == null) {
-					// TODO remove tracker from db
+					if (StorasDiscord.getDatabase().removeCountryTrackerByChannel(channelId))
+						LOG.info("Removing tracker (" + channelId + "): " + country + " " + gamemode);
 					break;
 				}
 				OsuApiBeatmap beatmap = score.getBeamap();

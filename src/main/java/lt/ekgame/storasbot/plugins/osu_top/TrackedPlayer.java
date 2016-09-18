@@ -9,8 +9,11 @@ import lt.ekgame.storasbot.utils.Tracker;
 import lt.ekgame.storasbot.utils.osu.OsuPlayerIdentifier;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.TextChannel;
+import net.dv8tion.jda.utils.SimpleLog;
 
 public class TrackedPlayer implements ScoreHandler, Tracker {
+	
+	private static SimpleLog LOG = SimpleLog.getLog("TrackedPlayer");
 
 	private String guildId, channelId;
 	private int personalTop, minPP;
@@ -47,6 +50,11 @@ public class TrackedPlayer implements ScoreHandler, Tracker {
 	public int getMinPerformance() {
 		return minPP;
 	}
+	
+	public void removeTracker() {
+		if (StorasDiscord.getDatabase().removePlayerTrackerByChannel(channelId))
+			LOG.info("Removing tracker (" + channelId + "): " + identifier.getUserId() + " " + identifier.getMode());
+	}
 
 	@Override
 	public void handleScoreUpdates(List<OsuScoreUpdate> scores) {
@@ -59,7 +67,7 @@ public class TrackedPlayer implements ScoreHandler, Tracker {
 				Guild guild = StorasDiscord.getJDA().getGuildById(guildId);
 				TextChannel channel = StorasDiscord.getJDA().getTextChannelById(channelId);
 				if (guild == null || channel == null) {
-					// TODO remove tracker from db
+					removeTracker();
 					break;
 				}
 				OsuApiBeatmap beatmap = score.getBeamap();

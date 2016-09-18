@@ -124,7 +124,7 @@ public class OsuScore {
 		else if (mode == OsuMode.CATCH) {
 			int total = count300 + count100 + countKatu + count50 + countMiss;
 			if (total == 0) return 0;
-			return 100*(count300 + count100 + count50)/(double)(6*total);
+			return 100*(count300 + count100 + count50)/(double)(total);
 		}
 		else if (mode == OsuMode.MANIA) {
 			int total = countGeki + count300 + count100 + countKatu + count50 + countMiss;

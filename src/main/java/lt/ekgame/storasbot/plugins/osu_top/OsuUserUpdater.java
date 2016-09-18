@@ -93,7 +93,7 @@ public class OsuUserUpdater {
 
 		private void updateIndividual(OsuPlayer catched, OsuUpdatablePlayer updatable) throws IOException, NumberFormatException, SQLException {
 			OsuPlayer updated = catched.getFromAPI();
-			LOG.debug(updated.getUsername() + ": (ind) quick check");
+			LOG.debug(updated.getUsername() + ": (ind " + updated.getGamemode() + ") quick check");
 			
 			double catchedPP = catched.getPerformance();
 			double knownPP = updated.getPerformance();

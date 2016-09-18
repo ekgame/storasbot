@@ -352,6 +352,30 @@ public class Database {
 		}
 	}
 	
+	public boolean removePlayerTrackerByChannel(String channelId) {
+		try (Handle handle = dbi.open()) {
+			List<Map<String, Object>> rawData =  handle.select("SELECT id FROM osu_user_tracker WHERE channel_id=?", channelId);
+			
+			if (rawData.size() != 0) {
+				handle.update("DELETE FROM osu_user_tracker WHERE id=?", (int) rawData.get(0).get("id"));
+				return true;
+			}
+			else return false;
+		}
+	}
+	
+	public boolean removeCountryTrackerByChannel(String channelId) {
+		try (Handle handle = dbi.open()) {
+			List<Map<String, Object>> rawData =  handle.select("SELECT id FROM osu_user_tracker WHERE channel_id=?", channelId);
+			
+			if (rawData.size() != 0) {
+				handle.update("DELETE FROM osu_country_tracker WHERE id=?", (int) rawData.get(0).get("id"));
+				return true;
+			}
+			else return false;
+		}
+	}
+	
 	// --------- Bin database --------- //
 	
 	public long getBinsCount(Guild guild) throws SQLException {

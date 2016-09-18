@@ -2,6 +2,7 @@ package lt.ekgame.storasbot.plugins.osu_top;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,6 +15,7 @@ import lt.ekgame.storasbot.utils.osu.OsuMode;
 import lt.ekgame.storasbot.utils.osu.OsuPlayer;
 import lt.ekgame.storasbot.utils.osu.OsuPlayerIdentifier;
 import lt.ekgame.storasbot.utils.osu.OsuUserCatche;
+import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.events.Event;
 import net.dv8tion.jda.events.ReadyEvent;
 import net.dv8tion.jda.hooks.EventListener;
@@ -39,6 +41,14 @@ public class OsuTracker extends Thread implements EventListener {
 	}
 
 	public void run() {
+		try {
+			// Wait 10 seconds before starting.
+			// This is to avoid potentially removing trackers
+			// for channels that haven't loaded yet.
+			Thread.sleep(10000);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
 		LOG.info("Starting osu! tracker.");
 		long loops = 0;
 		while (true) {
@@ -50,6 +60,28 @@ public class OsuTracker extends Thread implements EventListener {
 				// Registered trackers
 				List<TrackedCountry> countryTrackers = StorasDiscord.getDatabase().getTrackedCountries();
 				List<TrackedPlayer> playerTrackers = StorasDiscord.getDatabase().getTrackedPlayers();
+				
+				// check if channels for country trackers exist, remove then if not
+				Iterator<TrackedCountry> countryIterator = countryTrackers.iterator();
+				while (countryIterator.hasNext()) {
+					TrackedCountry tracker = countryIterator.next();
+					TextChannel channel = StorasDiscord.getJDA().getTextChannelById(tracker.getChannelId());
+					if (channel == null) {
+						tracker.removeTracker();
+						countryIterator.remove();
+					}
+				}
+				
+				// check if channels for player trackers exist, remove then if not
+				Iterator<TrackedPlayer> playerIterator = playerTrackers.iterator();
+				while (playerIterator.hasNext()) {
+					TrackedPlayer tracker = playerIterator.next();
+					TextChannel channel = StorasDiscord.getJDA().getTextChannelById(tracker.getChannelId());
+					if (channel == null) {
+						tracker.removeTracker();
+						playerIterator.remove();
+					}
+				}
 				
 				// Trackers grouped by leaderboard and gamemode
 				Map<CountryGroup, List<TrackedCountry>> countries = groupCountries(countryTrackers);
@@ -81,7 +113,7 @@ public class OsuTracker extends Thread implements EventListener {
 				}
 				
 				// Update players in parallel
-				OsuUserUpdater userUpdater = new OsuUserUpdater(20, userCatche);
+				OsuUserUpdater userUpdater = new OsuUserUpdater(15, userCatche);
 				updatablePlayers.submitPlayers(userUpdater);
 				
 				LOG.debug("Waiting to complete updates");
