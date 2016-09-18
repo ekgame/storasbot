@@ -64,12 +64,13 @@ public class MessageFormatter {
 		scope.put("artist", Utils.escapeMarkdown(beatmap.getArtist()));
 		scope.put("title", Utils.escapeMarkdown(beatmap.getTitle()));
 		scope.put("version", Utils.escapeMarkdown(beatmap.getVersion()));
+		//TODO: mods should affect od/cs/hp/ar values.
 		scope.put("od", decimalFormat.format(beatmap.getOverallDifficulty()));
 		scope.put("cs", decimalFormat.format(beatmap.getCircleSize()));
 		scope.put("hp", decimalFormat.format(beatmap.getHealthDrain()));
 		scope.put("ar", decimalFormat.format(beatmap.getApproachRate()));
-		scope.put("length", Utils.compactTimeString(beatmap.getTotalLength()));
-		scope.put("bpm", decimalFormat.format(beatmap.getBpm()));
+		scope.put("length", getLength(beatmap, score.getMods()));
+		scope.put("bpm", getBPM(beatmap, score.getMods()));
 		scope.put("stars", decimalFormat.format(beatmap.getStarDifficulty()));
 		scope.put("beatmap_link", String.format(BEATMAP_LINK, beatmap.getBeatmapId()));
 		scope.put("max_combo", String.valueOf(beatmap.getMaxCombo()));
@@ -88,6 +89,24 @@ public class MessageFormatter {
 		scoreFormat.execute(writer, scope);
 		writer.flush();
 		return writer.toString();
+	}
+	
+	private String getLength(OsuApiBeatmap beatmap, long mods) {
+		int length = beatmap.getTotalLength();
+		int lengthWithMods = beatmap.getTotalLength(mods);
+		String result = Utils.compactTimeString(beatmap.getTotalLength());
+		if (length < lengthWithMods) result += "⇧";
+		if (length > lengthWithMods) result += "⇩";
+		return result;
+	}
+	
+	private String getBPM(OsuApiBeatmap beatmap, long mods) {
+		double bpm = beatmap.getBpm();
+		double bpmWithMods = beatmap.getBpm(mods);
+		String result = decimalFormat.format(bpmWithMods);
+		if (bpm < bpmWithMods) result += "⇧";
+		if (bpm > bpmWithMods) result += "⇩";
+		return result;
 	}
 	
 	private String getAccuracy(OsuScore oldScore, OsuScore score, OsuMode gamemode) {
