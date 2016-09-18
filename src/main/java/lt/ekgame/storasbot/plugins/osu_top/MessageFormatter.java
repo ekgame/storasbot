@@ -62,10 +62,10 @@ public class MessageFormatter {
 		scope.put("artist", Utils.escapeMarkdown(beatmap.getArtist()));
 		scope.put("title", Utils.escapeMarkdown(beatmap.getTitle()));
 		scope.put("version", Utils.escapeMarkdown(beatmap.getVersion()));
-		scope.put("od", decimalFormat.format(beatmap.getOverallDifficulty(score.getMods())));
-		scope.put("cs", decimalFormat.format(beatmap.getCircleSize(score.getMods())));
-		scope.put("hp", decimalFormat.format(beatmap.getHealthDrain(score.getMods())));
-		scope.put("ar", decimalFormat.format(beatmap.getApproachRate(score.getMods())));
+		scope.put("od", decimalFormat.format(beatmap.getOverallDifficulty()));
+		scope.put("cs", decimalFormat.format(beatmap.getCircleSize()));
+		scope.put("hp", decimalFormat.format(beatmap.getHealthDrain()));
+		scope.put("ar", decimalFormat.format(beatmap.getApproachRate()));
 		scope.put("length", Utils.compactTimeString(beatmap.getTotalLength(score.getMods())));
 		scope.put("bpm", decimalFormat.format(beatmap.getBpm(score.getMods())));
 		scope.put("stars", decimalFormat.format(beatmap.getStarDifficulty()));
