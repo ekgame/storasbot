@@ -66,8 +66,8 @@ public class MessageFormatter {
 		scope.put("cs", decimalFormat.format(beatmap.getCircleSize()));
 		scope.put("hp", decimalFormat.format(beatmap.getHealthDrain()));
 		scope.put("ar", decimalFormat.format(beatmap.getApproachRate()));
-		scope.put("length", Utils.compactTimeString(beatmap.getTotalLength()));
-		scope.put("bpm", decimalFormat.format(beatmap.getBpm()));
+		scope.put("length", Utils.compactTimeString(beatmap.getTotalLength(score.getMods())));
+		scope.put("bpm", decimalFormat.format(beatmap.getBpm(score.getMods())));
 		scope.put("stars", decimalFormat.format(beatmap.getStarDifficulty()));
 		scope.put("beatmap_link", String.format(BEATMAP_LINK, beatmap.getBeatmapId()));
 		scope.put("max_combo", String.valueOf(beatmap.getMaxCombo()));
