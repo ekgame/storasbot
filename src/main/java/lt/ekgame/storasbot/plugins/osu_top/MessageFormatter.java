@@ -77,8 +77,8 @@ public class MessageFormatter {
 		
 		scope.put("rank", getRankString(score));
 		scope.put("score", decimalFormat.format(score.getScore()));
-		double accuracyOld = oldScore == null || gamemode == OsuMode.OSU ? score.getAccuracy(gamemode) : oldScore.getAccuracy(gamemode);
-		scope.put("accuracy", decimalFormat.format(score.getAccuracy(gamemode)) + "%" + getDiff(accuracyOld, score.getAccuracy(gamemode), false));
+		
+		scope.put("accuracy", getAccuracy(oldScore, score, gamemode));
 		scope.put("mods", getModsString(score.getMods()));
 		double performaceOld = oldScore == null ? score.getPerformance() : oldScore.getPerformance();
 		scope.put("performance_new", decimalFormat.format(score.getPerformance()) + "pp" + getDiff(performaceOld, score.getPerformance(), false));
@@ -88,6 +88,16 @@ public class MessageFormatter {
 		scoreFormat.execute(writer, scope);
 		writer.flush();
 		return writer.toString();
+	}
+	
+	private String getAccuracy(OsuScore oldScore, OsuScore score, OsuMode gamemode) {
+		// The current SQL structure for scores only saves x300, x100, x50 and misses.
+		// Some gamemodes need gekis and katus, so we just ignore them for now.
+		double accuracyOld = score.getAccuracy(gamemode);
+		if (oldScore != null && (gamemode == OsuMode.OSU || gamemode == OsuMode.TAIKO))
+			accuracyOld = oldScore.getAccuracy(gamemode);
+		
+		return decimalFormat.format(score.getAccuracy(gamemode)) + "%" + getDiff(accuracyOld, score.getAccuracy(gamemode), false);
 	}
 	
 	private String getDiff(double oldVal, double newVal, boolean invert) {
