@@ -52,8 +52,8 @@ public class TrackedPlayer implements ScoreHandler, Tracker {
 	}
 	
 	public void removeTracker() {
-		if (StorasDiscord.getDatabase().removePlayerTrackerByChannel(channelId))
-			LOG.info("Removing tracker (" + channelId + "): " + identifier.getUserId() + " " + identifier.getMode());
+		//if (StorasDiscord.getDatabase().removePlayerTrackerByChannel(channelId))
+		//	LOG.info("Removing tracker (" + channelId + "): " + identifier.getUserId() + " " + identifier.getMode());
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class TrackedPlayer implements ScoreHandler, Tracker {
 				Guild guild = StorasDiscord.getJDA().getGuildById(guildId);
 				TextChannel channel = StorasDiscord.getJDA().getTextChannelById(channelId);
 				if (guild == null || channel == null) {
-					removeTracker();
+					//removeTracker();
 					break;
 				}
 				OsuApiBeatmap beatmap = score.getBeamap();

@@ -71,8 +71,8 @@ public class TrackedCountry implements ScoreHandler, Tracker {
 	}
 	
 	public void removeTracker() {
-		if (StorasDiscord.getDatabase().removeCountryTrackerByChannel(channelId))
-			LOG.info("Removing tracker (" + channelId + "): " + country + " " + gamemode);
+		//if (StorasDiscord.getDatabase().removeCountryTrackerByChannel(channelId))
+		//	LOG.info("Removing tracker (" + channelId + "): " + country + " " + gamemode);
 	}
 	
 	public void handleScoreUpdates(List<OsuScoreUpdate> scores) {
@@ -87,8 +87,9 @@ public class TrackedCountry implements ScoreHandler, Tracker {
 				Guild guild = StorasDiscord.getJDA().getGuildById(guildId);
 				TextChannel channel = StorasDiscord.getJDA().getTextChannelById(channelId);
 				if (guild == null || channel == null) {
-					if (StorasDiscord.getDatabase().removeCountryTrackerByChannel(channelId))
+					/*if (StorasDiscord.getDatabase().removeCountryTrackerByChannel(channelId))
 						LOG.info("Removing tracker (" + channelId + "): " + country + " " + gamemode);
+					*/
 					break;
 				}
 				OsuApiBeatmap beatmap = score.getBeamap();
