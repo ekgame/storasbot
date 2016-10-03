@@ -23,6 +23,7 @@ import lt.ekgame.storasbot.utils.osu.OsuApi;
 import lt.ekgame.storasbot.utils.osu.OsuUserCatche;
 import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.JDABuilder;
+import net.dv8tion.jda.MessageBuilder;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.MessageChannel;
@@ -115,6 +116,14 @@ public class StorasDiscord {
 	
 	public static void sendMessage(MessageChannel messageChannel, String message) {
 		messageChannel.sendMessageAsync(message, null);
+	}
+	
+	public static void sendFile(MessageChannel messageChannel, String message, File file, Consumer<Message> consumer) {
+		messageChannel.sendFileAsync(file, new MessageBuilder().appendString(message).build(), consumer);
+	}
+	
+	public static void sendFile(MessageChannel messageChannel, String message, File file) {
+		messageChannel.sendFileAsync(file, new MessageBuilder().appendString(message).build(), null);
 	}
 	
 	public static void editMessage(Message message, String newText, Consumer<Message> consumer) {

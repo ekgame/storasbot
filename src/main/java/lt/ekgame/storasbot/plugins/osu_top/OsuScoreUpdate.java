@@ -2,7 +2,7 @@ package lt.ekgame.storasbot.plugins.osu_top;
 
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 
-import lt.ekgame.storasbot.utils.osu.OsuBeatmapCatche;
+import lt.ekgame.storasbot.plugins.beatmap_cache.OsuBeatmapCatche;
 import lt.ekgame.storasbot.utils.osu.OsuPlayer;
 import lt.ekgame.storasbot.utils.osu.OsuScore;
 
@@ -35,6 +35,6 @@ public class OsuScoreUpdate {
 	}
 
 	public OsuApiBeatmap getBeamap() {
-		return OsuBeatmapCatche.getBeatmap(newScore.getBeatmapId());
+		return OsuBeatmapCatche.getCachedBeatmap(newScore.getBeatmapId()).getApiBeatmap();
 	}
 }

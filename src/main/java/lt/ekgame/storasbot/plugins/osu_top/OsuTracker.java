@@ -67,7 +67,7 @@ public class OsuTracker extends Thread implements EventListener {
 					TrackedCountry tracker = countryIterator.next();
 					TextChannel channel = StorasDiscord.getJDA().getTextChannelById(tracker.getChannelId());
 					if (channel == null) {
-						tracker.removeTracker();
+						//tracker.removeTracker();
 						countryIterator.remove();
 					}
 				}
@@ -78,7 +78,7 @@ public class OsuTracker extends Thread implements EventListener {
 					TrackedPlayer tracker = playerIterator.next();
 					TextChannel channel = StorasDiscord.getJDA().getTextChannelById(tracker.getChannelId());
 					if (channel == null) {
-						tracker.removeTracker();
+						//tracker.removeTracker();
 						playerIterator.remove();
 					}
 				}

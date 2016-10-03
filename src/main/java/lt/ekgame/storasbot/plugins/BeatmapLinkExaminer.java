@@ -1,6 +1,9 @@
 package lt.ekgame.storasbot.plugins;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.LinkedList;
@@ -10,12 +13,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
+
+import org.apache.commons.lang3.RandomStringUtils;
 import org.tillerino.osuApiModel.OsuApiBeatmap;
 
+import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+import lt.ekgame.beatmap_analyzer.parser.BeatmapException;
 import lt.ekgame.storasbot.StorasDiscord;
+import lt.ekgame.storasbot.plugins.beatmap_cache.CachedBeatmap;
+import lt.ekgame.storasbot.plugins.beatmap_cache.OsuBeatmapCatche;
 import lt.ekgame.storasbot.utils.TableRenderer;
 import lt.ekgame.storasbot.utils.Utils;
-import lt.ekgame.storasbot.utils.osu.OsuBeatmapCatche;
+import lt.ekgame.storasbot.utils.osu.OsuMode;
 import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.hooks.ListenerAdapter;
@@ -28,7 +38,7 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 
 	private DecimalFormat diffFormat;
 	
-	private String TITLE = "___%s - %s___ (mapset by **%s**)";
+	private String TITLE = "___%s - %s___ (mapset by **%s**) | DL: <%s>";
 	
 	public BeatmapLinkExaminer() {
 		DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.UK);
@@ -43,7 +53,9 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 		if (event.getAuthor().equals(StorasDiscord.getJDA().getSelfInfo()))
 			return; // ignore own messages
 		
-		Boolean enabled = StorasDiscord.getSettings(event.getGuild()).get(Setting.BEATMAP_EXAMINER, Boolean.class);
+		
+		Settings settings = StorasDiscord.getSettings(event.getGuild());
+		Boolean enabled = settings.get(Setting.BEATMAP_EXAMINER, Boolean.class);
 		if (!enabled)
 			return; // don't process if disabled
 		
@@ -66,20 +78,54 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 				}
 			}
 			
-			StorasDiscord.sendMessage((TextChannel)event.getMessage().getChannel(), message);
+			if (maps.size() == 1 && maps.get(0).single && settings.get(Setting.BEATMAP_ANALYZER, Boolean.class)) {
+				processSingleBeatmap((TextChannel)event.getMessage().getChannel(), message, maps.get(0).beatmap);
+			}
+			else {
+				StorasDiscord.sendMessage((TextChannel)event.getMessage().getChannel(), message);
+			}
 		}
 	}
 	
+	private void processSingleBeatmap(TextChannel channel, String message, CachedBeatmap beatmap) {
+		if (beatmap.getMode() == OsuMode.CATCH) {
+			StorasDiscord.sendMessage(channel, message + "\n_Performance information for osu!catch is unavailable. Will implement if there is demand._");
+		}
+		else {
+			try {
+				Beatmap parsedBeatmap = beatmap.getParsedBeatmap();
+				BeatmapAnalyzer analyzer = new BeatmapAnalyzer(parsedBeatmap);
+				
+				File tempFile;
+				do  {
+					tempFile = new File(RandomStringUtils.randomAlphanumeric(16) + ".png");
+				} while (tempFile.exists());
+				final File file = tempFile;
+				
+				BufferedImage image = analyzer.getChartImage(600, 200);
+				ImageIO.write(image, "PNG", file);
+				
+				StorasDiscord.sendFile(channel, message, file, (msg) -> {
+					file.delete();
+				});
+			} catch (IllegalStateException | BeatmapException | IOException | URISyntaxException e) {
+				e.printStackTrace();
+				StorasDiscord.sendMessage(channel, message + "\n_Failed to analyze the beatmap._");
+			}
+		}
+	}
+
 	String generateMessage(MatchResult map) throws IOException {
 		TableRenderer table = new TableRenderer();
 		table.setHeader("Version", "Stars", "Combo", "BPM", "OD", "CS", "HP", "AR");
 		String title = null;
 		String addition = "";
 		if (map.single) {
-			OsuApiBeatmap beatmap = OsuBeatmapCatche.getBeatmap(map.id);
+			CachedBeatmap beatmap = OsuBeatmapCatche.getCachedBeatmap(map.id);
 			if (beatmap == null) return null;
-			title = generateTitle(beatmap);
-			generateVersion(table, beatmap);
+			map.beatmap = beatmap;
+			title = generateTitle(beatmap.getApiBeatmap());
+			generateVersion(table, beatmap.getApiBeatmap());
 		}
 		else {
 			List<OsuApiBeatmap> beatmaps = StorasDiscord.getOsuApi().getBeatmapSet(map.id);
@@ -103,7 +149,8 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 	
 	String generateTitle(OsuApiBeatmap beatmap) {
 		return String.format(TITLE, Utils.escapeMarkdown(beatmap.getArtist()), 
-			Utils.escapeMarkdown(beatmap.getTitle()), Utils.escapeMarkdown(beatmap.getCreator()));
+			Utils.escapeMarkdown(beatmap.getTitle()), Utils.escapeMarkdown(beatmap.getCreator()),
+			"http://osu.ppy.sh/d/" + beatmap.getSetId());
 	}
 	
 	void generateVersion(TableRenderer table, OsuApiBeatmap beatmap) {
@@ -130,6 +177,7 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 	class MatchResult {
 		boolean single;
 		String id;
+		CachedBeatmap beatmap;
 		
 		MatchResult(boolean single, String id) {
 			this.single = single;

@@ -5,7 +5,8 @@ public enum Setting {
 	ASIH("enabled_asih", false, Boolean.class),
 	BANCHO_STATUS("enabled_bancho_status", false, Boolean.class),
 	BANCHO_STATUS_CHANNEL("bancho_status_channel", null, String.class),
-	BEATMAP_EXAMINER("enabled_beatmap_examiner", true, Boolean.class);
+	BEATMAP_EXAMINER("enabled_beatmap_examiner", true, Boolean.class),
+	BEATMAP_ANALYZER("enabled_beatmap_anzlyzer", true, Boolean.class);
 	
 	private String sqlName;
 	private Object defaultValue;
