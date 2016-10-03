@@ -26,6 +26,7 @@ import lt.ekgame.storasbot.plugins.beatmap_cache.OsuBeatmapCatche;
 import lt.ekgame.storasbot.utils.TableRenderer;
 import lt.ekgame.storasbot.utils.Utils;
 import lt.ekgame.storasbot.utils.osu.OsuMode;
+import net.dv8tion.jda.Permission;
 import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.hooks.ListenerAdapter;
@@ -77,9 +78,12 @@ public class BeatmapLinkExaminer extends ListenerAdapter {
 					e.printStackTrace();
 				}
 			}
-			
+			TextChannel channel = (TextChannel)event.getMessage().getChannel();
 			if (maps.size() == 1 && maps.get(0).single && settings.get(Setting.BEATMAP_ANALYZER, Boolean.class)) {
-				processSingleBeatmap((TextChannel)event.getMessage().getChannel(), message, maps.get(0).beatmap);
+				if (!Utils.hasCommandPermission(channel, StorasDiscord.getJDA().getSelfInfo(), Permission.MESSAGE_ATTACH_FILES)) {
+					StorasDiscord.sendMessage((TextChannel)event.getMessage().getChannel(), message + "\n_Cant't display beatmap analysis, because I don't have permissions to attach files._");
+				}
+				else processSingleBeatmap((TextChannel)event.getMessage().getChannel(), message, maps.get(0).beatmap);
 			}
 			else {
 				StorasDiscord.sendMessage((TextChannel)event.getMessage().getChannel(), message);
